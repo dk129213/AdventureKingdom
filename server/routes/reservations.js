@@ -97,6 +97,12 @@ router.post('/', reservationLimiter, (req, res) => {
       }
     }
 
+    // Max children: 25 per room (Lion), 50 for Royal (both rooms)
+    const maxChildren = pkg === 'royal' ? 50 : 25;
+    if (parseInt(num_children) > maxChildren) {
+      errors.push(`Maximum ${maxChildren} children allowed for ${pkg === 'royal' ? 'Royal Party' : 'Lion'} package.`);
+    }
+
     if (errors.length > 0) {
       return res.status(400).json({ error: errors.join(' ') });
     }
@@ -105,7 +111,7 @@ router.post('/', reservationLimiter, (req, res) => {
     const pizzaQty = Math.min(20, Math.max(0, parseInt(addon_pizza) || 0));
     const cakeQty = Math.min(10, Math.max(0, parseInt(addon_cake) || 0));
     const extraChildQty = Math.min(30, Math.max(0, parseInt(addon_extra_child) || 0));
-    const childCount = Math.min(50, Math.max(1, parseInt(num_children) || 1));
+    const childCount = Math.min(maxChildren, Math.max(1, parseInt(num_children) || 1));
     const adultCount = Math.min(50, Math.max(0, parseInt(num_adults) || 0));
 
     const estimated_total = calculateTotal(pkg, pizzaQty, cakeQty, extraChildQty);

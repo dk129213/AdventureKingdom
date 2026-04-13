@@ -38,19 +38,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const pkgRoyal = document.getElementById('pkgRoyal');
 
   function updateRoomVisibility() {
+    const childrenInput = form.querySelector('input[name="num_children"]');
     if (pkgRoyal && pkgRoyal.checked) {
       // Royal Party includes both rooms — hide room chooser, show notice
       if (themeSelection) themeSelection.style.display = 'none';
       if (royalNotice) royalNotice.style.display = '';
-      // Auto-set theme to "both" (we'll send "both" to server)
+      if (childrenInput) childrenInput.max = '50';
     } else if (pkgLion && pkgLion.checked) {
       // Lion paket — show room chooser, hide notice
       if (themeSelection) themeSelection.style.display = '';
       if (royalNotice) royalNotice.style.display = 'none';
+      if (childrenInput) childrenInput.max = '25';
     } else {
       // No package selected yet — show room chooser
       if (themeSelection) themeSelection.style.display = '';
       if (royalNotice) royalNotice.style.display = 'none';
+      if (childrenInput) childrenInput.max = '25';
     }
   }
 
@@ -185,6 +188,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Client-side validation
+    const termsCheckbox = form.querySelector('.consent-check input[type="checkbox"]');
+    if (!termsCheckbox || !termsCheckbox.checked) {
+      showMessage(lang === 'hr' ? 'Morate prihvatiti uvjete rezervacije.' : 'You must accept the reservation terms and conditions.', 'error');
+      return;
+    }
     if (!data.package) {
       showMessage(lang === 'hr' ? 'Molimo odaberite paket.' : 'Please select a package.', 'error');
       return;
@@ -195,6 +203,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (!data.time_slot) {
       showMessage(lang === 'hr' ? 'Molimo odaberite termin.' : 'Please select a time slot.', 'error');
+      return;
+    }
+    // Max children limits: 25 per room (Lion), 50 for Royal (both rooms)
+    const maxChildren = data.package === 'royal' ? 50 : 25;
+    if (parseInt(data.num_children) > maxChildren) {
+      showMessage(
+        lang === 'hr'
+          ? `Maksimalan broj djece za ${data.package === 'royal' ? 'Royal Party' : 'Lion'} paket je ${maxChildren}.`
+          : `Maximum number of children for ${data.package === 'royal' ? 'Royal Party' : 'Lion'} package is ${maxChildren}.`,
+        'error'
+      );
       return;
     }
 

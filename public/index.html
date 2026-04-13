@@ -42,8 +42,165 @@
 
     <!-- HERO SECTION — Castle Wall -->
     <section class="hero" id="hero">
-        <!-- Castle wall via CSS pattern (replaces 100+ SVG rects) -->
-        <div class="hero-castle-wall"></div>
+        <!-- Realistic staggered brick wall (SVG pattern) -->
+        <svg class="hero-brick-svg" aria-hidden="true" preserveAspectRatio="none">
+            <defs>
+                <!-- Brick gradient fills for 3D depth -->
+                <linearGradient id="bkA" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#4a7399"/><stop offset="100%" stop-color="#3a5f8a"/>
+                </linearGradient>
+                <linearGradient id="bkB" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#4e7a9e"/><stop offset="100%" stop-color="#3e6791"/>
+                </linearGradient>
+                <linearGradient id="bkC" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#436d94"/><stop offset="100%" stop-color="#345580"/>
+                </linearGradient>
+                <linearGradient id="bkD" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#527ea3"/><stop offset="100%" stop-color="#40698e"/>
+                </linearGradient>
+                <linearGradient id="bkE" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#3f6e90"/><stop offset="100%" stop-color="#365c82"/>
+                </linearGradient>
+                <linearGradient id="bkF" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#4c789c"/><stop offset="100%" stop-color="#3c6389"/>
+                </linearGradient>
+                <pattern id="brickPattern" width="160" height="152" patternUnits="userSpaceOnUse">
+                    <rect width="160" height="152" fill="#1e2d42"/>
+                    <!-- Row 1: 2 full bricks -->
+                    <rect x="0" y="0" width="76" height="34" rx="2" fill="url(#bkA)"/>
+                    <rect x="80" y="0" width="76" height="34" rx="2" fill="url(#bkB)"/>
+                    <!-- Row 2: offset — partial + full + partial -->
+                    <rect x="0" y="38" width="38" height="34" rx="2" fill="url(#bkC)"/>
+                    <rect x="42" y="38" width="76" height="34" rx="2" fill="url(#bkD)"/>
+                    <rect x="122" y="38" width="38" height="34" rx="2" fill="url(#bkC)"/>
+                    <!-- Row 3: 2 full bricks (different shades) -->
+                    <rect x="0" y="76" width="76" height="34" rx="2" fill="url(#bkE)"/>
+                    <rect x="80" y="76" width="76" height="34" rx="2" fill="url(#bkF)"/>
+                    <!-- Row 4: offset (different shades) -->
+                    <rect x="0" y="114" width="38" height="34" rx="2" fill="url(#bkB)"/>
+                    <rect x="42" y="114" width="76" height="34" rx="2" fill="url(#bkA)"/>
+                    <rect x="122" y="114" width="38" height="34" rx="2" fill="url(#bkB)"/>
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#brickPattern)"/>
+        </svg>
+
+        <!-- Depth vignette overlay -->
+        <div class="hero-vignette"></div>
+
+        <!-- Gothic arched window -->
+        <div class="hero-window">
+            <div class="window-glow"></div>
+            <svg viewBox="0 0 220 380" class="window-svg" aria-hidden="true">
+                <defs>
+                    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#070b1a"/>
+                        <stop offset="50%" stop-color="#0f1530"/>
+                        <stop offset="100%" stop-color="#161c3a"/>
+                    </linearGradient>
+                    <radialGradient id="moonGlow" cx="0.65" cy="0.25">
+                        <stop offset="0%" stop-color="rgba(255,248,220,0.15)"/>
+                        <stop offset="100%" stop-color="transparent"/>
+                    </radialGradient>
+                    <clipPath id="windowClip">
+                        <path d="M28,380 L28,155 C28,70 110,18 110,18 C110,18 192,70 192,155 L192,380 Z"/>
+                    </clipPath>
+                </defs>
+
+                <!-- Stone frame outer -->
+                <path d="M16,380 L16,150 C16,58 110,6 110,6 C110,6 204,58 204,150 L204,380 Z"
+                      fill="#3d5a7a" stroke="#2d4560" stroke-width="2.5"/>
+                <!-- Stone frame inner highlight -->
+                <path d="M20,150 C20,62 110,10 110,10 C110,10 200,62 200,150"
+                      fill="none" stroke="#5a7ea0" stroke-width="1.2" opacity="0.6"/>
+
+                <!-- Window interior (night sky) -->
+                <g clip-path="url(#windowClip)">
+                    <rect width="220" height="380" fill="url(#skyGrad)"/>
+                    <!-- Moonlight ambient -->
+                    <rect width="220" height="380" fill="url(#moonGlow)"/>
+
+                    <!-- Stars (twinkling) -->
+                    <circle class="wstar ws1" cx="55" cy="55" r="1.8" fill="#fff"/>
+                    <circle class="wstar ws2" cx="90" cy="38" r="1.3" fill="#fff"/>
+                    <circle class="wstar ws3" cx="145" cy="50" r="1.6" fill="#fff"/>
+                    <circle class="wstar ws4" cx="65" cy="95" r="1" fill="#fff"/>
+                    <circle class="wstar ws5" cx="155" cy="85" r="1.4" fill="#fff"/>
+                    <circle class="wstar ws6" cx="110" cy="68" r="1.1" fill="#fff"/>
+                    <circle class="wstar ws7" cx="75" cy="130" r="0.9" fill="#fff"/>
+                    <circle class="wstar ws8" cx="148" cy="118" r="1.2" fill="#fff"/>
+                    <circle class="wstar ws9" cx="50" cy="160" r="0.8" fill="#fff"/>
+                    <circle class="wstar ws10" cx="170" cy="145" r="1" fill="#fff"/>
+                    <circle class="wstar ws11" cx="120" cy="105" r="0.7" fill="#fff"/>
+                    <circle class="wstar ws12" cx="85" cy="175" r="0.9" fill="#fff"/>
+
+                    <!-- Crescent moon -->
+                    <circle cx="148" cy="72" r="20" fill="#FFF8DC" opacity="0.92"/>
+                    <circle cx="157" cy="65" r="17" fill="#0f1530"/>
+                    <!-- Moon soft glow ring -->
+                    <circle cx="148" cy="72" r="32" fill="none" stroke="rgba(255,248,220,0.08)" stroke-width="8"/>
+                </g>
+
+                <!-- Stone mullion cross -->
+                <rect x="104" y="160" width="12" height="220" rx="4" fill="#3d5a7a" stroke="#2d4560" stroke-width="0.8"/>
+                <rect x="28" y="235" width="164" height="10" rx="3.5" fill="#3d5a7a" stroke="#2d4560" stroke-width="0.8"/>
+
+                <!-- Keystone at arch peak -->
+                <path d="M100,16 L110,6 L120,16 L116,20 L104,20 Z" fill="#5a7ea0" stroke="#4a6e90" stroke-width="0.5"/>
+            </svg>
+        </div>
+
+        <!-- Castle battlements (top edge) -->
+        <div class="hero-battlements">
+            <svg viewBox="0 0 1440 60" preserveAspectRatio="none" class="battlements-svg">
+                <defs>
+                    <pattern id="battBrick" width="80" height="30" patternUnits="userSpaceOnUse">
+                        <rect width="80" height="30" fill="#14233f"/>
+                        <rect x="0" y="0" width="37" height="13" rx="1" fill="#182a48"/>
+                        <rect x="40" y="0" width="37" height="13" rx="1" fill="#1a2e4d"/>
+                        <rect x="0" y="16" width="17" height="13" rx="1" fill="#1c3150"/>
+                        <rect x="20" y="16" width="37" height="13" rx="1" fill="#162842"/>
+                        <rect x="60" y="16" width="20" height="13" rx="1" fill="#1c3150"/>
+                    </pattern>
+                </defs>
+                <path d="M0,60 L0,30 L60,30 L60,0 L100,0 L100,30 L180,30 L180,0 L220,0 L220,30 L300,30 L300,0 L340,0 L340,30 L420,30 L420,0 L460,0 L460,30 L540,30 L540,0 L580,0 L580,30 L660,30 L660,0 L700,0 L700,30 L780,30 L780,0 L820,0 L820,30 L900,30 L900,0 L940,0 L940,30 L1020,30 L1020,0 L1060,0 L1060,30 L1140,30 L1140,0 L1180,0 L1180,30 L1260,30 L1260,0 L1300,0 L1300,30 L1380,30 L1380,0 L1420,0 L1420,30 L1440,30 L1440,60 Z" fill="url(#battBrick)"/>
+            </svg>
+        </div>
+
+        <!-- Bunting pennant flags -->
+        <div class="hero-bunting">
+            <svg viewBox="0 0 1200 90" preserveAspectRatio="xMidYMin slice" class="bunting-svg">
+                <!-- Rope/string -->
+                <path d="M0,6 Q200,28 400,10 Q600,32 800,12 Q1000,30 1200,8" stroke="rgba(255,248,220,0.25)" stroke-width="1.5" fill="none"/>
+                <!-- Pennant flags (point DOWN, fabric curve) -->
+                <path d="M78,9 Q89,38 88,55 L90,9 Z" fill="#c0544e" opacity="0.8"/>
+                <path d="M168,17 Q179,46 178,60 L180,17 Z" fill="#c9a832" opacity="0.8"/>
+                <path d="M268,22 Q279,50 278,65 L280,22 Z" fill="#5a8a7a" opacity="0.75"/>
+                <path d="M368,13 Q379,42 378,56 L380,13 Z" fill="#8a6aaf" opacity="0.75"/>
+                <path d="M468,24 Q479,52 478,67 L480,24 Z" fill="#c0544e" opacity="0.8"/>
+                <path d="M568,10 Q579,38 578,53 L580,10 Z" fill="#c9a832" opacity="0.8"/>
+                <path d="M668,20 Q679,48 678,63 L680,20 Z" fill="#5a8a7a" opacity="0.75"/>
+                <path d="M768,14 Q779,42 778,57 L780,14 Z" fill="#c0544e" opacity="0.75"/>
+                <path d="M868,26 Q879,54 878,69 L880,26 Z" fill="#c9a832" opacity="0.8"/>
+                <path d="M968,12 Q979,40 978,55 L980,12 Z" fill="#8a6aaf" opacity="0.75"/>
+                <path d="M1068,22 Q1079,50 1078,65 L1080,22 Z" fill="#5a8a7a" opacity="0.75"/>
+                <path d="M1148,8 Q1159,36 1158,51 L1160,8 Z" fill="#c9a832" opacity="0.75"/>
+            </svg>
+        </div>
+
+        <!-- Floating decorative elements -->
+        <div class="hero-sparkle sparkle-1"></div>
+        <div class="hero-sparkle sparkle-2"></div>
+        <div class="hero-sparkle sparkle-3"></div>
+        <div class="hero-sparkle sparkle-4"></div>
+        <div class="hero-sparkle sparkle-5"></div>
+        <div class="hero-sparkle sparkle-6"></div>
+        <div class="hero-star star-1"></div>
+        <div class="hero-star star-2"></div>
+        <div class="hero-star star-3"></div>
+
+        <!-- Radial glow behind content -->
+        <div class="hero-glow"></div>
 
         <div class="hero-content">
             <div class="hero-mascot">
@@ -59,14 +216,14 @@
             <p class="hero-tagline" data-hr>Igraonica &bull; Rodendani &bull; Radionice</p>
             <p class="hero-tagline" data-en>Playground &bull; Birthdays &bull; Workshops</p>
             <div class="hero-buttons">
-                <a href="rezervacija.html" class="btn btn-primary">
+                <a href="rezervacija.html" class="btn btn-primary btn-bounce">
                     <span class="btn-icon">&#x1F389;</span>
                     <span data-hr>Rezerviraj Rodendan</span>
                     <span data-en>Book a Birthday</span>
                 </a>
-                <a href="#about" class="btn btn-secondary">
-                    <span data-hr>Saznaj Vise</span>
-                    <span data-en>Learn More</span>
+                <a href="#services" class="btn btn-secondary">
+                    <span data-hr>Istrazite Ponudu</span>
+                    <span data-en>Explore Services</span>
                     <span class="btn-arrow">&darr;</span>
                 </a>
             </div>
