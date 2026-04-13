@@ -1,16 +1,21 @@
 const nodemailer = require('nodemailer');
 
+const dns = require('dns');
+dns.setDefaultResultOrder('ipv4first');
+
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,
+  port: 587,
+  secure: false,
+  requireTLS: true,
   auth: {
     user: process.env.SMTP_EMAIL,
     pass: process.env.SMTP_PASSWORD
   },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 15000
+  connectionTimeout: 15000,
+  greetingTimeout: 15000,
+  socketTimeout: 20000,
+  family: 4
 });
 
 const SLOT_NAMES = {
