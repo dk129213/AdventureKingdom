@@ -12,6 +12,9 @@ const { db } = require('./database');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy (required for Render — sits behind a reverse proxy)
+app.set('trust proxy', 1);
+
 // --- CSRF token store (in-memory, 15min TTL) ---
 const csrfTokens = new Map();
 
