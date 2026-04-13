@@ -1,0 +1,263 @@
+/* =============================================
+   Adventure Kingdom - Reservation Form Logic
+   ============================================= */
+
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('reservationForm');
+  if (!form) return;
+
+  const dateInput = document.getElementById('partyDate');
+  const emailInput = document.getElementById('parentEmail');
+  const submitBtn = document.getElementById('submitBtn');
+  const formMessage = document.getElementById('formMessage');
+
+  // --- Set date constraints: tomorrow to +6 months ---
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const maxDate = new Date(today);
+  maxDate.setMonth(maxDate.getMonth() + 6);
+
+  if (dateInput) {
+    dateInput.min = formatDate(tomorrow);
+    dateInput.max = formatDate(maxDate);
+  }
+
+  // --- Pre-fill email from localStorage (if cookie consent given) ---
+  if (emailInput) {
+    const savedEmail = localStorage.getItem('ak_customer_email');
+    if (savedEmail && localStorage.getItem('ak_consent') === 'true') {
+      emailInput.value = savedEmail;
+    }
+  }
+
+  // --- Package → Room visibility logic ---
+  const themeSelection = document.getElementById('themeSelection');
+  const royalNotice = document.getElementById('royalNotice');
+  const pkgLion = document.getElementById('pkgLion');
+  const pkgRoyal = document.getElementById('pkgRoyal');
+
+  function updateRoomVisibility() {
+    if (pkgRoyal && pkgRoyal.checked) {
+      // Royal Party includes both rooms — hide room chooser, show notice
+      if (themeSelection) themeSelection.style.display = 'none';
+      if (royalNotice) royalNotice.style.display = '';
+      // Auto-set theme to "both" (we'll send "both" to server)
+    } else if (pkgLion && pkgLion.checked) {
+      // Lion paket — show room chooser, hide notice
+      if (themeSelection) themeSelection.style.display = '';
+      if (royalNotice) royalNotice.style.display = 'none';
+    } else {
+      // No package selected yet — show room chooser
+      if (themeSelection) themeSelection.style.display = '';
+      if (royalNotice) royalNotice.style.display = 'none';
+    }
+  }
+
+  if (pkgLion) pkgLion.addEventListener('change', updateRoomVisibility);
+  if (pkgRoyal) pkgRoyal.addEventListener('change', updateRoomVisibility);
+  updateRoomVisibility();
+
+  // --- Fetch availability when date changes ---
+  let currentAvailability = null;
+
+  if (dateInput) {
+    dateInput.addEventListener('change', async () => {
+      const date = dateInput.value;
+      if (!date) return;
+
+      currentAvailability = null;
+      resetSlotStyles();
+
+      try {
+        const res = await fetch(`/api/availability?date=${date}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          showAvailabilityError(data.error);
+          return;
+        }
+
+        currentAvailability = data.availability;
+        updateSlotDisplay(currentAvailability);
+      } catch (err) {
+        showAvailabilityError('Could not check availability.');
+      }
+    });
+  }
+
+  function updateSlotDisplay(availability) {
+    const statusDiv = document.getElementById('availabilityStatus');
+    if (!statusDiv) return;
+
+    // Count available slots
+    let available = 0;
+    let total = 0;
+    for (const slot of Object.keys(availability)) {
+      for (const theme of Object.keys(availability[slot])) {
+        total++;
+        if (availability[slot][theme]) available++;
+      }
+    }
+
+    const lang = document.documentElement.getAttribute('data-lang') || 'hr';
+    if (available === 0) {
+      statusDiv.innerHTML = `<p style="color:var(--red);font-weight:600;">${lang === 'hr' ? 'Nema dostupnih termina za ovaj datum.' : 'No available slots for this date.'}</p>`;
+    } else {
+      statusDiv.innerHTML = `<p style="color:#2E7D32;font-weight:600;">${lang === 'hr' ? `${available} od ${total} termina dostupno` : `${available} of ${total} slots available`}</p>`;
+    }
+
+    // Disable unavailable theme+slot combinations using CSS classes
+    const themeRadios = form.querySelectorAll('input[name="theme"]');
+    const slotRadios = form.querySelectorAll('input[name="time_slot"]');
+
+    slotRadios.forEach(radio => {
+      const slotData = availability[radio.value];
+      const anyAvailable = slotData && (slotData.forest || slotData.royal);
+      const label = radio.closest('.time-option');
+      if (label) {
+        label.classList.toggle('unavailable', !anyAvailable);
+        radio.disabled = !anyAvailable;
+        if (!anyAvailable && radio.checked) radio.checked = false;
+      }
+    });
+
+    function updateThemeAvailability() {
+      const selectedSlot = form.querySelector('input[name="time_slot"]:checked');
+      if (!selectedSlot || !availability[selectedSlot.value]) return;
+      const slotData = availability[selectedSlot.value];
+      themeRadios.forEach(radio => {
+        const card = radio.closest('.option-card');
+        if (card) {
+          const avail = slotData[radio.value];
+          card.classList.toggle('unavailable', !avail);
+          radio.disabled = !avail;
+          if (!avail && radio.checked) radio.checked = false;
+        }
+      });
+    }
+
+    slotRadios.forEach(radio => {
+      radio.addEventListener('change', updateThemeAvailability);
+    });
+  }
+
+  function resetSlotStyles() {
+    form.querySelectorAll('.time-option, .option-card').forEach(el => {
+      el.classList.remove('unavailable');
+      const radio = el.querySelector('input');
+      if (radio) radio.disabled = false;
+    });
+    const statusDiv = document.getElementById('availabilityStatus');
+    if (statusDiv) statusDiv.innerHTML = '';
+  }
+
+  function showAvailabilityError(msg) {
+    const statusDiv = document.getElementById('availabilityStatus');
+    if (statusDiv) {
+      statusDiv.innerHTML = `<p style="color:var(--red);font-weight:600;">${msg}</p>`;
+    }
+  }
+
+  // --- Form submission ---
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const lang = document.documentElement.getAttribute('data-lang') || 'hr';
+
+    // Collect form data
+    const data = {
+      parent_name: form.parent_name.value,
+      parent_phone: form.parent_phone.value,
+      parent_email: form.parent_email.value,
+      child_name: form.child_name.value,
+      child_age: form.child_age.value,
+      party_date: form.party_date.value,
+      theme: (form.package?.value === 'royal') ? 'both' : form.theme?.value,
+      time_slot: form.time_slot?.value,
+      num_children: form.num_children.value,
+      num_adults: form.num_adults.value || '0',
+      package: form.package?.value,
+      addon_pizza: getQtyValue(0),
+      addon_cake: getQtyValue(1),
+      addon_extra_child: getQtyValue(2),
+      notes: form.notes.value
+    };
+
+    // Client-side validation
+    if (!data.package) {
+      showMessage(lang === 'hr' ? 'Molimo odaberite paket.' : 'Please select a package.', 'error');
+      return;
+    }
+    if (!data.theme) {
+      showMessage(lang === 'hr' ? 'Molimo odaberite sobu.' : 'Please select a room.', 'error');
+      return;
+    }
+    if (!data.time_slot) {
+      showMessage(lang === 'hr' ? 'Molimo odaberite termin.' : 'Please select a time slot.', 'error');
+      return;
+    }
+
+    // Disable submit
+    submitBtn.disabled = true;
+    submitBtn.style.opacity = '0.6';
+
+    try {
+      // Get CSRF token first
+      const csrfRes = await fetch('/api/csrf-token');
+      const csrfData = await csrfRes.json();
+
+      const res = await fetch('/api/reservations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfData.token
+        },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+
+      if (res.ok && result.success) {
+        // Save email to localStorage if consent given
+        if (localStorage.getItem('ak_consent') === 'true') {
+          localStorage.setItem('ak_customer_email', data.parent_email);
+        }
+
+        showMessage(
+          lang === 'hr'
+            ? `Hvala! Vasa rezervacija je poslana. Procijenjeni iznos: ${result.estimated_total}\u20AC. Kontaktirat cemo vas u roku 48 sati.`
+            : `Thank you! Your reservation has been submitted. Estimated total: ${result.estimated_total}\u20AC. We will contact you within 48 hours.`,
+          'success'
+        );
+
+        form.reset();
+        resetSlotStyles();
+      } else {
+        showMessage(result.error || (lang === 'hr' ? 'Greska pri slanju.' : 'Submission error.'), 'error');
+      }
+    } catch (err) {
+      showMessage(lang === 'hr' ? 'Greska u mrezi. Pokusajte ponovno.' : 'Network error. Please try again.', 'error');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = '';
+    }
+  });
+
+  function getQtyValue(index) {
+    const qtyValues = form.querySelectorAll('.qty-value');
+    return qtyValues[index] ? parseInt(qtyValues[index].textContent) || 0 : 0;
+  }
+
+  function showMessage(text, type) {
+    if (!formMessage) return;
+    formMessage.style.display = 'block';
+    formMessage.textContent = text;
+    formMessage.className = type === 'success' ? 'form-message success' : 'form-message error';
+    formMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function formatDate(d) {
+    return d.toISOString().split('T')[0];
+  }
+});

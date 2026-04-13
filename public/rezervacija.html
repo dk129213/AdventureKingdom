@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="hr" data-lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rezervacija Rodendana - Adventure Kingdom</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Baloo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- NAVIGATION -->
+    <nav class="navbar scrolled" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <img src="images/logo.png" alt="Adventure Kingdom" class="nav-logo-img">
+                <span class="logo-text">Adventure Kingdom</span>
+            </a>
+            <button class="lang-toggle" id="langToggle" aria-label="Switch language">
+                <span data-hr>HR</span><span data-en>EN</span>
+                <span class="lang-divider">|</span>
+                <span class="lang-switch" data-hr>EN</span>
+                <span class="lang-switch" data-en>HR</span>
+            </button>
+            <button class="hamburger" id="hamburger" aria-label="Otvori izbornik">
+                <span></span><span></span><span></span>
+            </button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html#about"><span data-hr>O Nama</span><span data-en>About Us</span></a></li>
+                <li><a href="index.html#services"><span data-hr>Usluge</span><span data-en>Services</span></a></li>
+                <li><a href="index.html#gallery"><span data-hr>Galerija</span><span data-en>Gallery</span></a></li>
+                <li><a href="index.html#contact"><span data-hr>Kontakt</span><span data-en>Contact</span></a></li>
+                <li><a href="rezervacija.html" class="nav-cta"><span data-hr>Rezerviraj</span><span data-en>Book Now</span></a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- PAGE HEADER -->
+    <header class="page-header">
+        <div class="container">
+            <h1 data-hr>&#x1F389; Rezervacija Rodendanske Proslave</h1>
+            <h1 data-en>&#x1F389; Birthday Party Reservation</h1>
+            <p data-hr>Ispunite obrazac kako biste zatrazili termin. Nas tim ce vas kontaktirati u roku od 48 sati.</p>
+            <p data-en>Fill out the form to request a time slot. Our team will contact you within 48 hours.</p>
+        </div>
+    </header>
+
+    <!-- RESERVATION FORM -->
+    <section class="reservation-page">
+        <div class="container">
+            <form class="reservation-form" id="reservationForm">
+
+                <!-- 1. Parent Info -->
+                <div class="form-section" data-animate>
+                    <div class="form-section-title">
+                        <span class="step-num">1</span>
+                        <span data-hr>Podaci Roditelja / Skrbnika</span>
+                        <span data-en>Parent / Guardian Information</span>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label data-hr>Ime i prezime</label>
+                            <label data-en>Full name</label>
+                            <input type="text" name="parent_name" placeholder="" required>
+                        </div>
+                        <div class="form-group">
+                            <label data-hr>Broj telefona</label>
+                            <label data-en>Phone number</label>
+                            <input type="tel" name="parent_phone" placeholder="+385" required>
+                        </div>
+                        <div class="form-group full">
+                            <label data-hr>Email adresa</label>
+                            <label data-en>Email address</label>
+                            <input type="email" name="parent_email" id="parentEmail" placeholder="" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Package Selection (FIRST — determines room options) -->
+                <div class="form-section" data-animate>
+                    <div class="form-section-title">
+                        <span class="step-num">2</span>
+                        <span data-hr>Odabir Paketa</span>
+                        <span data-en>Select Package</span>
+                    </div>
+                    <div class="option-cards">
+                        <label class="option-card">
+                            <input type="radio" name="package" value="lion" id="pkgLion">
+                            <div class="option-label">
+                                <span class="option-icon">&#x1F981;</span>
+                                <span class="option-name">Lion Paket</span>
+                                <span class="option-price">290&euro;</span>
+                                <span class="option-desc" data-hr>1 rodendanska soba po izboru</span>
+                                <span class="option-desc" data-en>1 birthday room of your choice</span>
+                            </div>
+                        </label>
+                        <label class="option-card">
+                            <input type="radio" name="package" value="royal" id="pkgRoyal">
+                            <div class="option-label">
+                                <span class="option-icon">&#x1F451;</span>
+                                <span class="option-name">Royal Party Paket</span>
+                                <span class="option-price">440&euro;</span>
+                                <span class="option-desc" data-hr>Obje rodendanske sobe ukljucene</span>
+                                <span class="option-desc" data-en>Both birthday rooms included</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 3. Party Details -->
+                <div class="form-section" data-animate>
+                    <div class="form-section-title">
+                        <span class="step-num">3</span>
+                        <span data-hr>Podaci o Proslavi</span>
+                        <span data-en>Party Details</span>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label data-hr>Ime slavljenika / slavljenice</label>
+                            <label data-en>Birthday child's name</label>
+                            <input type="text" name="child_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label data-hr>Koliko godina puni</label>
+                            <label data-en>Turning age</label>
+                            <input type="number" name="child_age" min="1" max="12" required>
+                        </div>
+                        <div class="form-group">
+                            <label data-hr>Zeljeni datum</label>
+                            <label data-en>Preferred date</label>
+                            <input type="date" name="party_date" id="partyDate" required>
+                        </div>
+                        <div class="form-group" id="availabilityStatus">
+                        </div>
+
+                        <!-- Room selection (only for Lion paket — Royal gets both) -->
+                        <div class="form-group full" id="themeSelection">
+                            <label data-hr>Odabir sobe</label>
+                            <label data-en>Choose room</label>
+                            <div class="option-cards">
+                                <label class="option-card">
+                                    <input type="radio" name="theme" value="forest">
+                                    <div class="option-label">
+                                        <span class="option-icon">&#x1F333;</span>
+                                        <span class="option-name" data-hr>Zacarana Suma</span>
+                                        <span class="option-name" data-en>Enchanted Forest</span>
+                                    </div>
+                                </label>
+                                <label class="option-card">
+                                    <input type="radio" name="theme" value="royal">
+                                    <div class="option-label">
+                                        <span class="option-icon">&#x1F451;</span>
+                                        <span class="option-name" data-hr>Kraljevska Soba</span>
+                                        <span class="option-name" data-en>Throne Room</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Notice for Royal Party -->
+                        <div class="form-group full" id="royalNotice" style="display:none;">
+                            <div style="background:#FFF9E6;border:2px solid var(--gold);border-radius:8px;padding:14px 18px;display:flex;align-items:center;gap:10px;">
+                                <span style="font-size:1.3rem;">&#x1F451;</span>
+                                <div>
+                                    <p data-hr style="margin:0;font-weight:600;color:var(--text-dark);">Royal Party paket ukljucuje obje sobe!</p>
+                                    <p data-en style="margin:0;font-weight:600;color:var(--text-dark);">Royal Party package includes both rooms!</p>
+                                    <p data-hr style="margin:2px 0 0;font-size:0.85rem;color:var(--text-muted);">Zacarana Suma + Kraljevska Soba</p>
+                                    <p data-en style="margin:2px 0 0;font-size:0.85rem;color:var(--text-muted);">Enchanted Forest + Throne Room</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Time slot -->
+                        <div class="form-group full">
+                            <label data-hr>Zeljeni termin</label>
+                            <label data-en>Preferred time slot</label>
+                            <div class="time-options">
+                                <label class="time-option">
+                                    <input type="radio" name="time_slot" value="morning">
+                                    <div class="time-label">
+                                        <span class="time-icon">&#x1F305;</span>
+                                        <span data-hr>Jutarnji (9:00 - 11:00)</span>
+                                        <span data-en>Morning (9:00 - 11:00)</span>
+                                    </div>
+                                </label>
+                                <label class="time-option">
+                                    <input type="radio" name="time_slot" value="afternoon">
+                                    <div class="time-label">
+                                        <span class="time-icon">&#x2600;</span>
+                                        <span data-hr>Poslijepodnevni (12:00 - 14:00)</span>
+                                        <span data-en>Afternoon (12:00 - 14:00)</span>
+                                    </div>
+                                </label>
+                                <label class="time-option">
+                                    <input type="radio" name="time_slot" value="late-afternoon">
+                                    <div class="time-label">
+                                        <span class="time-icon">&#x1F324;</span>
+                                        <span data-hr>Kasno poslijepodne (15:00 - 17:00)</span>
+                                        <span data-en>Late afternoon (15:00 - 17:00)</span>
+                                    </div>
+                                </label>
+                                <label class="time-option">
+                                    <input type="radio" name="time_slot" value="evening">
+                                    <div class="time-label">
+                                        <span class="time-icon">&#x1F319;</span>
+                                        <span data-hr>Vecernji (18:00 - 20:00)</span>
+                                        <span data-en>Evening (18:00 - 20:00)</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Number of Guests -->
+                <div class="form-section" data-animate>
+                    <div class="form-section-title">
+                        <span class="step-num">4</span>
+                        <span data-hr>Broj Gostiju</span>
+                        <span data-en>Number of Guests</span>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label data-hr>Procijenjeni broj djece (dob 1-12)</label>
+                            <label data-en>Estimated number of children (ages 1-12)</label>
+                            <input type="number" name="num_children" min="1" max="50" required>
+                        </div>
+                        <div class="form-group">
+                            <label data-hr>Procijenjeni broj odraslih</label>
+                            <label data-en>Estimated number of adults</label>
+                            <input type="number" name="num_adults" min="0" max="50">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Add-ons -->
+                <div class="form-section" data-animate>
+                    <div class="form-section-title">
+                        <span class="step-num">5</span>
+                        <span data-hr>Dodaci</span>
+                        <span data-en>Add-ons</span>
+                    </div>
+                    <div class="addon-items">
+                        <div class="addon-item">
+                            <span class="addon-icon">&#x1F355;</span>
+                            <div class="addon-info">
+                                <div class="addon-name" data-hr>Dodatna pizza</div>
+                                <div class="addon-name" data-en>Extra pizza</div>
+                                <div class="addon-price" data-hr>10&euro; po komadu</div>
+                                <div class="addon-price" data-en>10&euro; per piece</div>
+                            </div>
+                            <div class="addon-qty">
+                                <button type="button" class="qty-minus">-</button>
+                                <span class="qty-value">0</span>
+                                <button type="button" class="qty-plus">+</button>
+                            </div>
+                        </div>
+                        <div class="addon-item">
+                            <span class="addon-icon">&#x1F370;</span>
+                            <div class="addon-info">
+                                <div class="addon-name" data-hr>Dodatna Ledo torta</div>
+                                <div class="addon-name" data-en>Extra Ledo cake</div>
+                                <div class="addon-price" data-hr>20&euro; po komadu</div>
+                                <div class="addon-price" data-en>20&euro; per piece</div>
+                            </div>
+                            <div class="addon-qty">
+                                <button type="button" class="qty-minus">-</button>
+                                <span class="qty-value">0</span>
+                                <button type="button" class="qty-plus">+</button>
+                            </div>
+                        </div>
+                        <div class="addon-item">
+                            <span class="addon-icon">&#x1F476;</span>
+                            <div class="addon-info">
+                                <div class="addon-name" data-hr>Dodatno dijete</div>
+                                <div class="addon-name" data-en>Extra child</div>
+                                <div class="addon-price" data-hr>8&euro; po djetetu</div>
+                                <div class="addon-price" data-en>8&euro; per child</div>
+                            </div>
+                            <div class="addon-qty">
+                                <button type="button" class="qty-minus">-</button>
+                                <span class="qty-value">0</span>
+                                <button type="button" class="qty-plus">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. Important Info & Terms -->
+                <div class="form-section" data-animate>
+                    <div class="form-section-title">
+                        <span class="step-num">6</span>
+                        <span data-hr>Vazne Informacije</span>
+                        <span data-en>Important Information</span>
+                    </div>
+                    <div class="form-group full" style="margin-bottom:20px;">
+                        <label data-hr>Alergije ili posebne napomene</label>
+                        <label data-en>Allergies or special notes</label>
+                        <textarea name="notes" rows="3"></textarea>
+                    </div>
+
+                    <div class="terms-box" data-hr>
+                        <strong>Uvjeti i Odredbe:</strong>
+                        <ul>
+                            <li><strong>Potvrda broja djece:</strong> Konacan broj djece mora se potvrditi najkasnije 48 sati prije pocetka proslave.</li>
+                            <li><strong>Obvezna oprema:</strong> Sva djeca moraju nositi protuklizne carape. Ako dijete nema svoje carape, mozete ih kupiti u prostoru po sniženoj cijeni od 2,00&euro; po paru.</li>
+                            <li><strong>Vlastite torte:</strong> Posluzivanje torte koju ste sami donijeli iskljuciva je odgovornost vlasnika/gosta.</li>
+                            <li>Objekt ne snosi odgovornost za zdravstvenu ispravnost i sigurnost hrane unesene izvana.</li>
+                            <li><strong>Nije dozvoljeno</strong> unosenje dodatne hrane izvana unutar objekta.</li>
+                        </ul>
+                    </div>
+                    <div class="terms-box" data-en>
+                        <strong>Terms & Conditions:</strong>
+                        <ul>
+                            <li><strong>Guest confirmation:</strong> Final number of children must be confirmed at least 48 hours before the celebration.</li>
+                            <li><strong>Required equipment:</strong> All children must wear non-slip socks. If a child does not have their own, you can purchase them on-site at a reduced price of 2.00&euro; per pair.</li>
+                            <li><strong>Own cakes:</strong> Serving a cake you brought yourself is the sole responsibility of the owner/guest.</li>
+                            <li>The venue is not responsible for the health safety of food brought from outside.</li>
+                            <li><strong>No outside food</strong> is allowed on the premises.</li>
+                        </ul>
+                    </div>
+
+                    <label class="consent-check">
+                        <input type="checkbox" required>
+                        <span data-hr>Razumijem i prihvacam uvjete rezervacije te potvrdujem.</span>
+                        <span data-en>I understand and accept the reservation terms and conditions.</span>
+                    </label>
+                </div>
+
+                <!-- Submit -->
+                <div class="submit-section" data-animate>
+                    <div id="formMessage" style="display:none;"></div>
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        <span>&#x1F389;</span>
+                        <span data-hr>Posalji Zahtjev za Rezervaciju</span>
+                        <span data-en>Submit Reservation Request</span>
+                    </button>
+                    <p class="submit-note" data-hr>Nas tim ce vas kontaktirati u roku od 48 sati.</p>
+                    <p class="submit-note" data-en>Our team will contact you within 48 hours.</p>
+                    <a href="/" class="back-link">
+                        <span>&larr;</span>
+                        <span data-hr>Povratak na pocetnu</span>
+                        <span data-en>Back to home</span>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p data-hr>&copy; 2026 Adventure Kingdom. Sva prava pridrzana.</p>
+                <p data-en>&copy; 2026 Adventure Kingdom. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/cookieConsent.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/reservation.js"></script>
+</body>
+</html>
