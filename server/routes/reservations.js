@@ -34,9 +34,17 @@ function sanitizeEmail(str) {
 const insertReservationTx = db.transaction((data) => {
   // Check availability inside the transaction — eliminates race condition
   const existing = stmts.getBookedSlots.all(data.party_date);
-  const isBooked = existing.some(
-    r => r.time_slot === data.time_slot && r.theme === data.theme
-  );
+  const sameSlot = existing.filter(r => r.time_slot === data.time_slot);
+
+  let isBooked = false;
+
+  if (data.theme === 'both') {
+    // Royal package needs BOTH rooms — conflict if ANY room is booked in this slot
+    isBooked = sameSlot.length > 0;
+  } else {
+    // Single room — conflict if same room is booked OR a Royal ('both') is booked in this slot
+    isBooked = sameSlot.some(r => r.theme === data.theme || r.theme === 'both');
+  }
 
   if (isBooked) {
     return { conflict: true };
@@ -98,9 +106,11 @@ router.post('/', reservationLimiter, (req, res) => {
     }
 
     // Max children: 25 per room (Lion), 50 for Royal (both rooms)
+    // Total = num_children + addon_extra_child
     const maxChildren = pkg === 'royal' ? 50 : 25;
-    if (parseInt(num_children) > maxChildren) {
-      errors.push(`Maximum ${maxChildren} children allowed for ${pkg === 'royal' ? 'Royal Party' : 'Lion'} package.`);
+    const totalChildren = (parseInt(num_children) || 0) + (parseInt(addon_extra_child) || 0);
+    if (totalChildren > maxChildren) {
+      errors.push(`Total children (${totalChildren}) exceeds maximum of ${maxChildren} for ${pkg === 'royal' ? 'Royal Party' : 'Lion'} package.`);
     }
 
     if (errors.length > 0) {

@@ -57,8 +57,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  if (pkgLion) pkgLion.addEventListener('change', updateRoomVisibility);
-  if (pkgRoyal) pkgRoyal.addEventListener('change', updateRoomVisibility);
+  if (pkgLion) pkgLion.addEventListener('change', () => {
+    updateRoomVisibility();
+    // Re-check slot availability when package changes
+    if (currentAvailability) updateSlotDisplay(currentAvailability);
+  });
+  if (pkgRoyal) pkgRoyal.addEventListener('change', () => {
+    updateRoomVisibility();
+    if (currentAvailability) updateSlotDisplay(currentAvailability);
+  });
   updateRoomVisibility();
 
   // --- Fetch availability when date changes ---
@@ -114,14 +121,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeRadios = form.querySelectorAll('input[name="theme"]');
     const slotRadios = form.querySelectorAll('input[name="time_slot"]');
 
+    const isRoyalPkg = pkgRoyal && pkgRoyal.checked;
+
     slotRadios.forEach(radio => {
       const slotData = availability[radio.value];
-      const anyAvailable = slotData && (slotData.forest || slotData.royal);
+      let slotAvailable;
+      if (isRoyalPkg) {
+        // Royal needs BOTH rooms free
+        slotAvailable = slotData && slotData.forest && slotData.royal;
+      } else {
+        // Lion needs at least one room free
+        slotAvailable = slotData && (slotData.forest || slotData.royal);
+      }
       const label = radio.closest('.time-option');
       if (label) {
-        label.classList.toggle('unavailable', !anyAvailable);
-        radio.disabled = !anyAvailable;
-        if (!anyAvailable && radio.checked) radio.checked = false;
+        label.classList.toggle('unavailable', !slotAvailable);
+        radio.disabled = !slotAvailable;
+        if (!slotAvailable && radio.checked) radio.checked = false;
       }
     });
 
@@ -206,12 +222,14 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     // Max children limits: 25 per room (Lion), 50 for Royal (both rooms)
+    // For Royal: num_children + addon_extra_child cannot exceed 50
     const maxChildren = data.package === 'royal' ? 50 : 25;
-    if (parseInt(data.num_children) > maxChildren) {
+    const totalChildren = parseInt(data.num_children) + parseInt(data.addon_extra_child || 0);
+    if (totalChildren > maxChildren) {
       showMessage(
         lang === 'hr'
-          ? `Maksimalan broj djece za ${data.package === 'royal' ? 'Royal Party' : 'Lion'} paket je ${maxChildren}.`
-          : `Maximum number of children for ${data.package === 'royal' ? 'Royal Party' : 'Lion'} package is ${maxChildren}.`,
+          ? `Ukupan broj djece (${totalChildren}) prelazi maksimum od ${maxChildren} za ${data.package === 'royal' ? 'Royal Party' : 'Lion'} paket.`
+          : `Total number of children (${totalChildren}) exceeds the maximum of ${maxChildren} for the ${data.package === 'royal' ? 'Royal Party' : 'Lion'} package.`,
         'error'
       );
       return;

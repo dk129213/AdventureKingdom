@@ -41,9 +41,16 @@ router.get('/', (req, res) => {
   }
 
   // Mark booked slots
+  // 'both' (Royal) blocks BOTH rooms; single room blocks itself + prevents Royal
   for (const row of booked) {
     if (availability[row.time_slot]) {
-      availability[row.time_slot][row.theme] = false;
+      if (row.theme === 'both') {
+        // Royal booking blocks both rooms
+        availability[row.time_slot]['forest'] = false;
+        availability[row.time_slot]['royal'] = false;
+      } else {
+        availability[row.time_slot][row.theme] = false;
+      }
     }
   }
 
