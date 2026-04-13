@@ -50,6 +50,7 @@ app.use(helmet({
       imgSrc: ["'self'", "data:", "https:"],
       connectSrc: ["'self'"],
       formAction: ["'self'"],
+      frameSrc: ["'self'", "https://www.google.com"],
       frameAncestors: ["'none'"],
       objectSrc: ["'none'"],
       baseUri: ["'self'"]
@@ -80,7 +81,7 @@ app.use(express.urlencoded({ extended: false, limit: '5kb' }));
 app.use((req, res, next) => {
   if (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH') {
     const ct = req.headers['content-type'];
-    if (ct && !ct.includes('application/json') && !ct.includes('application/x-www-form-urlencoded')) {
+    if (ct && !ct.includes('application/json') && !ct.includes('application/x-www-form-urlencoded') && !ct.includes('multipart/form-data')) {
       return res.status(415).json({ error: 'Unsupported content type.' });
     }
   }
@@ -119,10 +120,20 @@ const authRoutes = require('./routes/auth');
 const reservationRoutes = require('./routes/reservations');
 const eventRoutes = require('./routes/events');
 const availabilityRoutes = require('./routes/availability');
+const galleryRoutes = require('./routes/gallery');
+
+// Serve gallery images from persistent disk
+const galleryDir = path.join(process.env.DATA_DIR || path.join(__dirname, '..', 'data'), 'gallery');
+app.use('/gallery-images', express.static(galleryDir, {
+  maxAge: '7d',
+  etag: true,
+  lastModified: true
+}));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/availability', availabilityRoutes);
 app.use('/api/events', eventRoutes);
+app.use('/api/gallery', galleryRoutes);
 
 // Apply CSRF to public reservation POST only
 app.post('/api/reservations', csrfProtection);

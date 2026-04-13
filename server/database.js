@@ -39,6 +39,15 @@ db.exec(`
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
+  CREATE TABLE IF NOT EXISTS gallery_images (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    filename TEXT NOT NULL UNIQUE,
+    label_hr TEXT NOT NULL DEFAULT '',
+    label_en TEXT NOT NULL DEFAULT '',
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
   CREATE TABLE IF NOT EXISTS events (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title_hr TEXT NOT NULL,
@@ -175,6 +184,29 @@ const stmts = {
 
   deleteEvent: db.prepare(`
     DELETE FROM events WHERE id = ?
+  `),
+
+  // Gallery
+  getGalleryImages: db.prepare(`
+    SELECT * FROM gallery_images ORDER BY sort_order ASC, id ASC
+  `),
+
+  getGalleryImageById: db.prepare(`
+    SELECT * FROM gallery_images WHERE id = ?
+  `),
+
+  insertGalleryImage: db.prepare(`
+    INSERT INTO gallery_images (filename, label_hr, label_en, sort_order)
+    VALUES (@filename, @label_hr, @label_en, @sort_order)
+  `),
+
+  updateGalleryImage: db.prepare(`
+    UPDATE gallery_images SET label_hr=@label_hr, label_en=@label_en, sort_order=@sort_order
+    WHERE id=@id
+  `),
+
+  deleteGalleryImage: db.prepare(`
+    DELETE FROM gallery_images WHERE id = ?
   `)
 };
 

@@ -370,7 +370,8 @@
             </h2>
             <p class="section-subtitle" data-hr>Zavirite u nase magicno kraljevstvo</p>
             <p class="section-subtitle" data-en>Take a peek into our magical kingdom</p>
-            <div class="gallery-grid">
+            <div class="gallery-grid" id="galleryGrid">
+                <!-- Default images (replaced by admin-uploaded gallery if available) -->
                 <div class="gallery-item" data-animate>
                     <div class="gallery-card">
                         <img src="images/tobogan.jpeg" alt="Tobogan" loading="eager">
@@ -500,14 +501,8 @@
                         <span class="contact-icon">&#x1F5FA;</span>
                         <h3 data-hr>Lokacija</h3><h3 data-en>Location</h3>
                     </div>
-                    <div class="map-placeholder">
-                        <div class="map-pin">
-                            <svg viewBox="0 0 24 36" class="pin-svg"><path d="M12,0 C5.4,0 0,5.4 0,12 C0,21 12,36 12,36 C12,36 24,21 24,12 C24,5.4 18.6,0 12,0 Z" fill="var(--red)"/><circle cx="12" cy="12" r="5" fill="white"/></svg>
-                        </div>
-                        <p class="map-text">Adventure Kingdom</p>
-                        <p class="map-address">Srebreno, Dubrovnik</p>
-                        <div class="map-roads"><div class="map-road road-h"></div><div class="map-road road-v"></div><div class="map-road road-d"></div></div>
-                        <div class="map-water"></div>
+                    <div class="map-embed">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2872.5!2d18.2219!3d42.6261!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sSrebreno%2C+20207!5e0!3m2!1shr!2shr!4v1700000000000" width="100%" height="280" style="border:0;border-radius:8px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                     </div>
                 </div>
             </div>
@@ -572,5 +567,6 @@
 
     <script src="js/cookieConsent.js"></script>
     <script src="js/script.js"></script>
+    <script src="js/gallery.js"></script>
 </body>
 </html>

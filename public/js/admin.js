@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadStats();
     loadReservations();
     loadEvents();
+    loadGallery();
   }
 
   // --- Login ---
@@ -378,6 +379,149 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('publishLabel').textContent = 'Published';
     document.getElementById('eventFormTitle').textContent = 'Create New Event';
     document.getElementById('cancelEventBtn').style.display = 'none';
+  }
+
+  // ========================
+  // GALLERY MANAGEMENT
+  // ========================
+
+  async function loadGallery() {
+    const grid = document.getElementById('galleryGrid');
+    if (!grid) return;
+    grid.innerHTML = '<p style="text-align:center;padding:40px;color:#999;">Loading gallery...</p>';
+    try {
+      const res = await Auth.apiFetch('/api/gallery');
+      const data = await res.json();
+      if (!data.success || !data.data.length) {
+        grid.innerHTML = '<p style="text-align:center;padding:40px;color:#999;">No gallery images yet. Upload your first photo above.</p>';
+        return;
+      }
+      grid.innerHTML = data.data.map(img => `
+        <div class="gallery-admin-card" data-gallery-id="${img.id}">
+          <img src="/gallery-images/${esc(img.filename)}" alt="${esc(img.label_en || img.label_hr || 'Gallery image')}" loading="lazy">
+          <div class="gallery-card-info">
+            <div class="gallery-card-label">${esc(img.label_hr) || '<em style="color:#999;">No HR label</em>'}</div>
+            <div class="gallery-card-sublabel">${esc(img.label_en) || '<em style="color:#999;">No EN label</em>'}</div>
+            <div class="gallery-card-order">Sort: ${img.sort_order}</div>
+          </div>
+          <div class="gallery-card-actions">
+            <button class="action-btn edit" data-gallery-action="edit" data-gallery-id="${img.id}">Edit</button>
+            <button class="action-btn delete" data-gallery-action="delete" data-gallery-id="${img.id}">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    } catch (err) {
+      grid.innerHTML = '<p style="text-align:center;padding:40px;color:#c00;">Failed to load gallery.</p>';
+      console.error('Gallery load error:', err);
+    }
+  }
+
+  // --- Upload ---
+  document.getElementById('uploadGalleryBtn').addEventListener('click', async () => {
+    const fileInput = document.getElementById('galleryFile');
+    const file = fileInput.files[0];
+    if (!file) {
+      alert('Please select an image file.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('label_hr', document.getElementById('galleryLabelHr').value);
+    formData.append('label_en', document.getElementById('galleryLabelEn').value);
+    formData.append('sort_order', document.getElementById('gallerySortOrder').value || '0');
+
+    const btn = document.getElementById('uploadGalleryBtn');
+    btn.disabled = true;
+    btn.textContent = 'Uploading...';
+
+    try {
+      const token = Auth.getToken();
+      const res = await fetch('/api/gallery', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        // Reset form
+        fileInput.value = '';
+        document.getElementById('galleryLabelHr').value = '';
+        document.getElementById('galleryLabelEn').value = '';
+        document.getElementById('gallerySortOrder').value = '0';
+        loadGallery();
+      } else {
+        alert('Upload failed: ' + (data.error || 'Unknown error'));
+      }
+    } catch (err) {
+      console.error('Upload error:', err);
+      alert('Upload failed. Please try again.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Upload Photo';
+    }
+  });
+
+  // --- Gallery event delegation ---
+  document.getElementById('galleryGrid').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-gallery-action]');
+    if (!btn) return;
+    const id = parseInt(btn.dataset.galleryId);
+    if (btn.dataset.galleryAction === 'delete') deleteGalleryImage(id);
+    else if (btn.dataset.galleryAction === 'edit') editGalleryImage(id);
+  });
+
+  async function deleteGalleryImage(id) {
+    if (!confirm('Are you sure you want to delete this image?')) return;
+    try {
+      const res = await Auth.apiFetch(`/api/gallery/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        loadGallery();
+      } else {
+        alert('Delete failed: ' + (data.error || 'Unknown error'));
+      }
+    } catch (err) {
+      console.error('Delete error:', err);
+      alert('Failed to delete image.');
+    }
+  }
+
+  async function editGalleryImage(id) {
+    const card = document.querySelector(`.gallery-admin-card[data-gallery-id="${id}"]`);
+    if (!card) return;
+
+    const currentHr = card.querySelector('.gallery-card-label').textContent.trim();
+    const currentEn = card.querySelector('.gallery-card-sublabel').textContent.trim();
+    const currentOrder = card.querySelector('.gallery-card-order').textContent.replace('Sort: ', '').trim();
+
+    const newHr = prompt('Label (HR):', currentHr === 'No HR label' ? '' : currentHr);
+    if (newHr === null) return;
+    const newEn = prompt('Label (EN):', currentEn === 'No EN label' ? '' : currentEn);
+    if (newEn === null) return;
+    const newOrder = prompt('Sort order:', currentOrder);
+    if (newOrder === null) return;
+
+    try {
+      const res = await Auth.apiFetch(`/api/gallery/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          label_hr: newHr,
+          label_en: newEn,
+          sort_order: parseInt(newOrder) || 0
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        loadGallery();
+      } else {
+        alert('Update failed: ' + (data.error || 'Unknown error'));
+      }
+    } catch (err) {
+      console.error('Edit error:', err);
+      alert('Failed to update image.');
+    }
   }
 
   function esc(str) {
