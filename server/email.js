@@ -75,46 +75,76 @@ async function notifyOwner(reservation) {
   }
 }
 
-// --- Send auto-reply to customer ---
+// --- Send auto-reply to customer (BILINGUAL HR + EN) ---
 async function notifyCustomer(reservation) {
   const r = reservation;
   try {
     await transporter.sendMail({
       from: `"Adventure Kingdom" <${process.env.SMTP_EMAIL}>`,
       to: r.parent_email,
-      subject: `Vasa rezervacija #${r.id} - Adventure Kingdom`,
+      subject: `Vasa rezervacija / Your reservation #${r.id} - Adventure Kingdom`,
       html: `
         <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
           <div style="background:#1A3A8F;color:white;padding:24px;border-radius:12px 12px 0 0;text-align:center;">
             <h1 style="margin:0;color:#FFD700;font-size:24px;">Adventure Kingdom</h1>
-            <p style="margin:8px 0 0;opacity:0.9;">Magicno kraljevstvo igre</p>
+            <p style="margin:8px 0 0;opacity:0.9;">Magicno kraljevstvo igre / A magical kingdom of play</p>
           </div>
           <div style="background:white;padding:28px;border:1px solid #e0e0e0;border-top:none;">
-            <h2 style="color:#1A3A8F;margin-top:0;">Hvala vam, ${r.parent_name}!</h2>
-            <p style="color:#555;line-height:1.6;">
-              Zaprimili smo vas zahtjev za rezervaciju rodendanske proslave.
-              Nas tim ce pregledati vas zahtjev i kontaktirati vas u roku od <strong>48 sati</strong>
-              kako bi potvrdili dostupnost termina.
-            </p>
 
-            <div style="background:#FFF9E6;border:2px solid #FFD700;border-radius:8px;padding:20px;margin:20px 0;">
-              <h3 style="color:#1A3A8F;margin-top:0;">Detalji vase rezervacije:</h3>
-              <p style="margin:6px 0;color:#333;"><strong>Slavljenik:</strong> ${r.child_name} (${r.child_age} god.)</p>
-              <p style="margin:6px 0;color:#333;"><strong>Datum:</strong> ${r.party_date}</p>
-              <p style="margin:6px 0;color:#333;"><strong>Termin:</strong> ${SLOT_NAMES[r.time_slot] || r.time_slot}</p>
-              <p style="margin:6px 0;color:#333;"><strong>Tema:</strong> ${THEME_NAMES[r.theme] || r.theme}</p>
-              <p style="margin:6px 0;color:#333;"><strong>Paket:</strong> ${PKG_NAMES[r.package] || r.package}</p>
-              <p style="margin:6px 0;color:#333;"><strong>Procijenjeni iznos:</strong> <span style="color:#27AE60;font-weight:bold;">${r.estimated_total}\u20AC</span></p>
-              <p style="margin:6px 0;color:#888;font-size:13px;">Placanje se vrsi iskljucivo osobno na licu mjesta.</p>
+            <!-- CROATIAN -->
+            <div style="margin-bottom:28px;padding-bottom:28px;border-bottom:2px solid #e0e0e0;">
+              <h2 style="color:#1A3A8F;margin-top:0;">Hvala vam, ${r.parent_name}!</h2>
+              <p style="color:#555;line-height:1.6;">
+                Zaprimili smo vas zahtjev za rezervaciju rodendanske proslave.
+                Nas tim ce pregledati vas zahtjev i kontaktirati vas u roku od <strong>48 sati</strong>
+                kako bi potvrdili dostupnost termina.
+              </p>
+
+              <div style="background:#FFF9E6;border:2px solid #FFD700;border-radius:8px;padding:20px;margin:20px 0;">
+                <h3 style="color:#1A3A8F;margin-top:0;">Detalji vase rezervacije:</h3>
+                <p style="margin:6px 0;color:#333;"><strong>Slavljenik:</strong> ${r.child_name} (${r.child_age} god.)</p>
+                <p style="margin:6px 0;color:#333;"><strong>Datum:</strong> ${r.party_date}</p>
+                <p style="margin:6px 0;color:#333;"><strong>Termin:</strong> ${SLOT_NAMES[r.time_slot] || r.time_slot}</p>
+                <p style="margin:6px 0;color:#333;"><strong>Tema:</strong> ${THEME_NAMES[r.theme] || r.theme}</p>
+                <p style="margin:6px 0;color:#333;"><strong>Paket:</strong> ${PKG_NAMES[r.package] || r.package}</p>
+                <p style="margin:6px 0;color:#333;"><strong>Procijenjeni iznos:</strong> <span style="color:#27AE60;font-weight:bold;">${r.estimated_total}\u20AC</span></p>
+                <p style="margin:6px 0;color:#888;font-size:13px;">Placanje se vrsi iskljucivo osobno na licu mjesta.</p>
+              </div>
+
+              <p style="color:#555;line-height:1.6;">Ako imate pitanja, slobodno nas kontaktirajte:</p>
+              <p style="color:#333;">
+                <strong>Telefon:</strong> +385 91 532 8953<br>
+                <strong>Instagram:</strong> @adventure_kingdom
+              </p>
             </div>
 
-            <p style="color:#555;line-height:1.6;">
-              Ako imate pitanja, slobodno nas kontaktirajte:
-            </p>
-            <p style="color:#333;">
-              <strong>Telefon:</strong> +385 91 532 8953<br>
-              <strong>Instagram:</strong> @adventure_kingdom
-            </p>
+            <!-- ENGLISH -->
+            <div>
+              <h2 style="color:#1A3A8F;margin-top:0;">Thank you, ${r.parent_name}!</h2>
+              <p style="color:#555;line-height:1.6;">
+                We have received your birthday party reservation request.
+                Our team will review your request and contact you within <strong>48 hours</strong>
+                to confirm availability.
+              </p>
+
+              <div style="background:#FFF9E6;border:2px solid #FFD700;border-radius:8px;padding:20px;margin:20px 0;">
+                <h3 style="color:#1A3A8F;margin-top:0;">Your reservation details:</h3>
+                <p style="margin:6px 0;color:#333;"><strong>Birthday child:</strong> ${r.child_name} (age ${r.child_age})</p>
+                <p style="margin:6px 0;color:#333;"><strong>Date:</strong> ${r.party_date}</p>
+                <p style="margin:6px 0;color:#333;"><strong>Time slot:</strong> ${SLOT_NAMES[r.time_slot] || r.time_slot}</p>
+                <p style="margin:6px 0;color:#333;"><strong>Room:</strong> ${THEME_NAMES[r.theme] || r.theme}</p>
+                <p style="margin:6px 0;color:#333;"><strong>Package:</strong> ${PKG_NAMES[r.package] || r.package}</p>
+                <p style="margin:6px 0;color:#333;"><strong>Estimated total:</strong> <span style="color:#27AE60;font-weight:bold;">${r.estimated_total}\u20AC</span></p>
+                <p style="margin:6px 0;color:#888;font-size:13px;">Payment is made exclusively in person on-site.</p>
+              </div>
+
+              <p style="color:#555;line-height:1.6;">If you have any questions, feel free to contact us:</p>
+              <p style="color:#333;">
+                <strong>Phone:</strong> +385 91 532 8953<br>
+                <strong>Instagram:</strong> @adventure_kingdom
+              </p>
+            </div>
+
           </div>
           <div style="background:#0A1229;padding:20px;border-radius:0 0 12px 12px;text-align:center;">
             <p style="color:#FFD700;margin:0;font-size:14px;font-weight:bold;">Adventure Kingdom</p>
