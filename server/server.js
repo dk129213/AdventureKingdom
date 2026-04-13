@@ -150,7 +150,7 @@ const { requireAuth, requireRole } = require('./middleware/auth');
 app.get('/api/admin/backup', requireAuth, requireRole('admin'), (req, res) => {
   try {
     const fs = require('fs');
-    const backupDir = path.join(__dirname, '..', 'data', 'backups');
+    const backupDir = path.join(process.env.DATA_DIR || path.join(__dirname, '..', 'data'), 'backups');
     if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -174,7 +174,7 @@ app.get('/api/admin/backup', requireAuth, requireRole('admin'), (req, res) => {
 function runScheduledBackup() {
   try {
     const fs = require('fs');
-    const backupDir = path.join(__dirname, '..', 'data', 'backups');
+    const backupDir = path.join(process.env.DATA_DIR || path.join(__dirname, '..', 'data'), 'backups');
     if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
 
     const timestamp = new Date().toISOString().split('T')[0];
