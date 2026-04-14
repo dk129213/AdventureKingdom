@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="images/logo.png">
     <title>Rezervacija Rodendana - Adventure Kingdom</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -93,6 +94,22 @@
                                 <span class="option-price">290&euro;</span>
                                 <span class="option-desc" data-hr>1 rodendanska soba po izboru</span>
                                 <span class="option-desc" data-en>1 birthday room of your choice</span>
+                                <ul class="package-includes" data-hr>
+                                    <li>2 sata igre</li>
+                                    <li>Ukljuceno 20 djece (maks. 25)</li>
+                                    <li>Ledo rodendanska torta</li>
+                                    <li>1 pizza, pice i cips</li>
+                                    <li>Grupna fotografija</li>
+                                    <li>Posveceni koordinator rodendana</li>
+                                </ul>
+                                <ul class="package-includes" data-en>
+                                    <li>2 hours of play</li>
+                                    <li>20 children included (max. 25)</li>
+                                    <li>Ledo birthday cake</li>
+                                    <li>1 pizza, drinks and chips</li>
+                                    <li>Group photo</li>
+                                    <li>Dedicated birthday coordinator</li>
+                                </ul>
                             </div>
                         </label>
                         <label class="option-card">
@@ -103,9 +120,29 @@
                                 <span class="option-price">440&euro;</span>
                                 <span class="option-desc" data-hr>Obje rodendanske sobe ukljucene</span>
                                 <span class="option-desc" data-en>Both birthday rooms included</span>
+                                <ul class="package-includes" data-hr>
+                                    <li>2 sata igre</li>
+                                    <li>26+ djece (maks. 50)</li>
+                                    <li>2 Ledo rodendanske torte</li>
+                                    <li>3 pizze, pice i cips</li>
+                                    <li>Grupna fotografija</li>
+                                    <li>Posveceni koordinator rodendana</li>
+                                    <li>Ukljucene obje rodendanske sobe</li>
+                                </ul>
+                                <ul class="package-includes" data-en>
+                                    <li>2 hours of play</li>
+                                    <li>26+ children (max. 50)</li>
+                                    <li>2 Ledo birthday cakes</li>
+                                    <li>3 pizzas, drinks and chips</li>
+                                    <li>Group photo</li>
+                                    <li>Dedicated birthday coordinator</li>
+                                    <li>Both birthday rooms included</li>
+                                </ul>
                             </div>
                         </label>
                     </div>
+                    <p class="package-note" data-hr>* Svi paketi ukljucuju stol, ukrase, case, tanjure i pribor za jelo. Dobna granica do 12 godina.</p>
+                    <p class="package-note" data-en>* All packages include table, decorations, cups, plates and cutlery. Age limit up to 12 years.</p>
                 </div>
 
                 <!-- 3. Party Details -->
@@ -138,19 +175,19 @@
                         <div class="form-group full" id="themeSelection">
                             <label data-hr>Odabir sobe</label>
                             <label data-en>Choose room</label>
-                            <div class="option-cards">
-                                <label class="option-card">
+                            <div class="option-cards room-cards">
+                                <label class="option-card room-card">
                                     <input type="radio" name="theme" value="forest">
                                     <div class="option-label">
-                                        <span class="option-icon">&#x1F333;</span>
+                                        <img src="images/sumskaavantura.jpeg" alt="Zacarana Suma" class="room-card-img">
                                         <span class="option-name" data-hr>Zacarana Suma</span>
                                         <span class="option-name" data-en>Enchanted Forest</span>
                                     </div>
                                 </label>
-                                <label class="option-card">
+                                <label class="option-card room-card">
                                     <input type="radio" name="theme" value="royal">
                                     <div class="option-label">
-                                        <span class="option-icon">&#x1F451;</span>
+                                        <img src="images/kraljevskitron.jpeg" alt="Kraljevska Soba" class="room-card-img">
                                         <span class="option-name" data-hr>Kraljevska Soba</span>
                                         <span class="option-name" data-en>Throne Room</span>
                                     </div>
@@ -247,8 +284,8 @@
                             <div class="addon-info">
                                 <div class="addon-name" data-hr>Dodatna pizza</div>
                                 <div class="addon-name" data-en>Extra pizza</div>
-                                <div class="addon-price" data-hr>10&euro; po komadu</div>
-                                <div class="addon-price" data-en>10&euro; per piece</div>
+                                <div class="addon-price" data-hr>10&euro; po pizzi</div>
+                                <div class="addon-price" data-en>10&euro; per pizza</div>
                             </div>
                             <div class="addon-qty">
                                 <button type="button" class="qty-minus">-</button>
@@ -261,8 +298,8 @@
                             <div class="addon-info">
                                 <div class="addon-name" data-hr>Dodatna Ledo torta</div>
                                 <div class="addon-name" data-en>Extra Ledo cake</div>
-                                <div class="addon-price" data-hr>20&euro; po komadu</div>
-                                <div class="addon-price" data-en>20&euro; per piece</div>
+                                <div class="addon-price" data-hr>20&euro; po torti</div>
+                                <div class="addon-price" data-en>20&euro; per cake</div>
                             </div>
                             <div class="addon-qty">
                                 <button type="button" class="qty-minus">-</button>
@@ -271,10 +308,10 @@
                             </div>
                         </div>
                         <div class="addon-item">
-                            <span class="addon-icon">&#x1F476;</span>
+                            <span class="addon-icon">&#x1F46A;</span>
                             <div class="addon-info">
-                                <div class="addon-name" data-hr>Dodatno dijete</div>
-                                <div class="addon-name" data-en>Extra child</div>
+                                <div class="addon-name" data-hr>Dodatna djeca</div>
+                                <div class="addon-name" data-en>Additional children</div>
                                 <div class="addon-price" data-hr>8&euro; po djetetu</div>
                                 <div class="addon-price" data-en>8&euro; per child</div>
                             </div>
@@ -305,9 +342,9 @@
                         <ul>
                             <li><strong>Potvrda broja djece:</strong> Konacan broj djece mora se potvrditi najkasnije 48 sati prije pocetka proslave.</li>
                             <li><strong>Obvezna oprema:</strong> Sva djeca moraju nositi protuklizne carape. Ako dijete nema svoje carape, mozete ih kupiti u prostoru po sniženoj cijeni od 2,00&euro; po paru.</li>
-                            <li><strong>Vlastite torte:</strong> Posluzivanje torte koju ste sami donijeli iskljuciva je odgovornost vlasnika/gosta.</li>
-                            <li>Objekt ne snosi odgovornost za zdravstvenu ispravnost i sigurnost hrane unesene izvana.</li>
+                            <li><strong>Dodatne torte, grickalice i pice:</strong> Donosenje dodatnih torti, grickalica i pica je dozvoljeno, ali objekt ne snosi odgovornost za zdravstvenu ispravnost i sigurnost hrane unesene izvana.</li>
                             <li><strong>Nije dozvoljeno</strong> unosenje dodatne hrane izvana unutar objekta.</li>
+                            <li><strong>Alkohol nije dozvoljen</strong> u prostoru objekta.</li>
                         </ul>
                     </div>
                     <div class="terms-box" data-en>
@@ -315,9 +352,9 @@
                         <ul>
                             <li><strong>Guest confirmation:</strong> Final number of children must be confirmed at least 48 hours before the celebration.</li>
                             <li><strong>Required equipment:</strong> All children must wear non-slip socks. If a child does not have their own, you can purchase them on-site at a reduced price of 2.00&euro; per pair.</li>
-                            <li><strong>Own cakes:</strong> Serving a cake you brought yourself is the sole responsibility of the owner/guest.</li>
-                            <li>The venue is not responsible for the health safety of food brought from outside.</li>
+                            <li><strong>Additional cake, snacks and drinks:</strong> Bringing additional cake, snacks and drinks is allowed, but the venue is not responsible for the health safety of food brought from outside.</li>
                             <li><strong>No outside food</strong> is allowed on the premises.</li>
+                            <li><strong>No alcohol</strong> is allowed on the premises.</li>
                         </ul>
                     </div>
 

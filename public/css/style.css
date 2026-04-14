@@ -1326,6 +1326,101 @@ img { max-width: 100%; display: block; }
 .option-card .option-price { font-weight: 700; color: var(--blue-dark); font-size: 1.1rem; }
 .option-card .option-desc { font-size: 0.8rem; color: var(--text-muted); }
 
+/* Package includes list */
+.package-includes {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0;
+    text-align: left;
+    width: 100%;
+}
+
+.package-includes li {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    padding: 2px 0;
+    position: relative;
+    padding-left: 18px;
+}
+
+.package-includes li::before {
+    content: '\2714';
+    position: absolute;
+    left: 0;
+    color: #27AE60;
+    font-size: 0.75rem;
+}
+
+.package-note {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 12px;
+    font-style: italic;
+    text-align: center;
+}
+
+/* Room card images */
+.room-card-img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+}
+
+.room-card .option-label {
+    padding-top: 0 !important;
+    overflow: hidden;
+}
+
+.room-card .option-label .option-name {
+    margin-top: 4px;
+}
+
+/* Gallery lightbox */
+.gallery-lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: zoom-out;
+    animation: fadeIn 0.2s ease;
+    padding: 20px;
+}
+
+.gallery-lightbox img {
+    max-width: 90vw;
+    max-height: 90vh;
+    border-radius: var(--radius-md);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    object-fit: contain;
+}
+
+.gallery-lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 2.5rem;
+    cursor: pointer;
+    line-height: 1;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.gallery-lightbox-close:hover {
+    opacity: 1;
+}
+
+.gallery-card {
+    cursor: pointer;
+}
+
 /* Time slot options */
 .time-options {
     display: grid;

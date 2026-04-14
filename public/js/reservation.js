@@ -204,6 +204,21 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Client-side validation
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(data.parent_email)) {
+      showMessage(lang === 'hr' ? 'Molimo unesite ispravnu email adresu.' : 'Please enter a valid email address.', 'error');
+      return;
+    }
+
+    // Phone validation — allow +, digits, spaces, dashes, min 8 digits
+    const phoneDigits = data.parent_phone.replace(/\D/g, '');
+    if (phoneDigits.length < 8 || phoneDigits.length > 15) {
+      showMessage(lang === 'hr' ? 'Molimo unesite ispravan broj telefona (minimalno 8 znamenki).' : 'Please enter a valid phone number (at least 8 digits).', 'error');
+      return;
+    }
+
     const termsCheckbox = form.querySelector('.consent-check input[type="checkbox"]');
     if (!termsCheckbox || !termsCheckbox.checked) {
       showMessage(lang === 'hr' ? 'Morate prihvatiti uvjete rezervacije.' : 'You must accept the reservation terms and conditions.', 'error');
