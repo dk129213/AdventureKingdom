@@ -11,11 +11,11 @@ document.addEventListener('DOMContentLoaded', () => {
   banner.id = 'cookieBanner';
   banner.innerHTML = `
     <div class="cookie-inner">
-      <p data-hr>Koristimo lokalno spremanje podataka (localStorage) kako bismo zapamtili vasu email adresu za buducu rezervaciju. Nikakvi kolacici se ne salju trecim stranama.</p>
+      <p data-hr>Koristimo lokalno spremanje podataka (localStorage) kako bismo zapamtili vašu e-mail adresu za buduću rezervaciju. Nikakvi kolačići se ne šalju trećim stranama.</p>
       <p data-en>We use local storage (localStorage) to remember your email for future reservations. No cookies are sent to third parties.</p>
       <div class="cookie-buttons">
         <button id="cookieAccept" class="cookie-btn accept">
-          <span data-hr>Prihvacam</span><span data-en>Accept</span>
+          <span data-hr>Prihvaćam</span><span data-en>Accept</span>
         </button>
         <button id="cookieDecline" class="cookie-btn decline">
           <span data-hr>Odbijam</span><span data-en>Decline</span>

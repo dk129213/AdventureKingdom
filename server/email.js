@@ -82,12 +82,12 @@ async function notifyCustomer(reservation) {
     await transporter.sendMail({
       from: `"Adventure Kingdom" <${process.env.SMTP_EMAIL}>`,
       to: r.parent_email,
-      subject: `Vasa rezervacija / Your reservation #${r.id} - Adventure Kingdom`,
+      subject: `Vaša rezervacija / Your reservation #${r.id} - Adventure Kingdom`,
       html: `
         <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
           <div style="background:#1A3A8F;color:white;padding:24px;border-radius:12px 12px 0 0;text-align:center;">
             <h1 style="margin:0;color:#FFD700;font-size:24px;">Adventure Kingdom</h1>
-            <p style="margin:8px 0 0;opacity:0.9;">Magicno kraljevstvo igre / A magical kingdom of play</p>
+            <p style="margin:8px 0 0;opacity:0.9;">Magično kraljevstvo igre / A magical kingdom of play</p>
           </div>
           <div style="background:white;padding:28px;border:1px solid #e0e0e0;border-top:none;">
 
@@ -95,20 +95,20 @@ async function notifyCustomer(reservation) {
             <div style="margin-bottom:28px;padding-bottom:28px;border-bottom:2px solid #e0e0e0;">
               <h2 style="color:#1A3A8F;margin-top:0;">Hvala vam, ${r.parent_name}!</h2>
               <p style="color:#555;line-height:1.6;">
-                Zaprimili smo vas zahtjev za rezervaciju rodendanske proslave.
-                Nas tim ce pregledati vas zahtjev i kontaktirati vas u roku od <strong>48 sati</strong>
+                Zaprimili smo vaš zahtjev za rezervaciju rođendanske proslave.
+                Naš tim će pregledati vaš zahtjev i kontaktirati vas u roku od <strong>48 sati</strong>
                 kako bi potvrdili dostupnost termina.
               </p>
 
               <div style="background:#FFF9E6;border:2px solid #FFD700;border-radius:8px;padding:20px;margin:20px 0;">
-                <h3 style="color:#1A3A8F;margin-top:0;">Detalji vase rezervacije:</h3>
+                <h3 style="color:#1A3A8F;margin-top:0;">Detalji vaše rezervacije:</h3>
                 <p style="margin:6px 0;color:#333;"><strong>Slavljenik:</strong> ${r.child_name} (${r.child_age} god.)</p>
                 <p style="margin:6px 0;color:#333;"><strong>Datum:</strong> ${r.party_date}</p>
                 <p style="margin:6px 0;color:#333;"><strong>Termin:</strong> ${SLOT_NAMES[r.time_slot] || r.time_slot}</p>
                 <p style="margin:6px 0;color:#333;"><strong>Tema:</strong> ${THEME_NAMES[r.theme] || r.theme}</p>
                 <p style="margin:6px 0;color:#333;"><strong>Paket:</strong> ${PKG_NAMES[r.package] || r.package}</p>
                 <p style="margin:6px 0;color:#333;"><strong>Procijenjeni iznos:</strong> <span style="color:#27AE60;font-weight:bold;">${r.estimated_total}\u20AC</span></p>
-                <p style="margin:6px 0;color:#888;font-size:13px;">Placanje se vrsi iskljucivo osobno na licu mjesta.</p>
+                <p style="margin:6px 0;color:#888;font-size:13px;">Plaćanje se vrši isključivo osobno na licu mjesta.</p>
               </div>
 
               <p style="color:#555;line-height:1.6;">Ako imate pitanja, slobodno nas kontaktirajte:</p>
@@ -149,7 +149,7 @@ async function notifyCustomer(reservation) {
           <div style="background:#0A1229;padding:20px;border-radius:0 0 12px 12px;text-align:center;">
             <p style="color:#FFD700;margin:0;font-size:14px;font-weight:bold;">Adventure Kingdom</p>
             <p style="color:rgba(255,255,255,0.5);margin:4px 0 0;font-size:12px;">
-              Setaliste dr. Franje Tudmana 4a, 20207 Srebreno
+              Šetalište dr. Franje Tuđmana 4a, 20207 Srebreno
             </p>
           </div>
         </div>
@@ -170,7 +170,7 @@ async function notifyStatusChange(reservation, newStatus, rejectionReason) {
   const statusIcon = isConfirmed ? '&#x2705;' : '&#x274C;';
 
   const subject = isConfirmed
-    ? `Rezervacija potvrdena! / Reservation confirmed! - Adventure Kingdom #${r.id}`
+    ? `Rezervacija potvrđena! / Reservation confirmed! - Adventure Kingdom #${r.id}`
     : `Rezervacija odbijena / Reservation declined - Adventure Kingdom #${r.id}`;
 
   try {
@@ -188,15 +188,15 @@ async function notifyStatusChange(reservation, newStatus, rejectionReason) {
             <!-- CROATIAN -->
             <div style="margin-bottom:30px;padding-bottom:30px;border-bottom:2px solid #e0e0e0;">
               <div style="background:${statusColorBg};color:white;padding:12px 20px;border-radius:8px;text-align:center;margin-bottom:16px;">
-                <h2 style="margin:0;font-size:18px;">${isConfirmed ? 'Vasa rezervacija je potvrdena!' : 'Vasa rezervacija je odbijena'}</h2>
+                <h2 style="margin:0;font-size:18px;">${isConfirmed ? 'Vaša rezervacija je potvrđena!' : 'Vaša rezervacija je odbijena'}</h2>
               </div>
 
               <p style="color:#555;line-height:1.6;">
-                Postovani/a ${r.parent_name},
+                Poštovani/a ${r.parent_name},
               </p>
               ${isConfirmed ? `
                 <p style="color:#555;line-height:1.6;">
-                  Sa zadovoljstvom vam javljamo da je vasa rezervacija rodendanske proslave <strong>potvrdena</strong>!
+                  Sa zadovoljstvom vam javljamo da je vaša rezervacija rođendanske proslave <strong>potvrđena</strong>!
                 </p>
                 <div style="background:#FFF9E6;border:2px solid #FFD700;border-radius:8px;padding:16px;margin:16px 0;">
                   <p style="margin:4px 0;color:#333;"><strong>Slavljenik:</strong> ${r.child_name} (${r.child_age} god.)</p>
@@ -206,11 +206,11 @@ async function notifyStatusChange(reservation, newStatus, rejectionReason) {
                   <p style="margin:4px 0;color:#333;"><strong>Procijenjeni iznos:</strong> <span style="color:#27AE60;font-weight:bold;">${r.estimated_total}\u20AC</span></p>
                 </div>
                 <p style="color:#555;line-height:1.6;">
-                  Placanje se vrsi iskljucivo osobno na licu mjesta. Vidimo se!
+                  Plaćanje se vrši isključivo osobno na licu mjesta. Vidimo se!
                 </p>
               ` : `
                 <p style="color:#555;line-height:1.6;">
-                  Nazalost, nismo u mogucnosti potvrditi vasu rezervaciju za <strong>${r.party_date}</strong>.
+                  Nažalost, nismo u mogućnosti potvrditi vašu rezervaciju za <strong>${r.party_date}</strong>.
                 </p>
                 ${rejectionReason ? `<p style="color:#555;line-height:1.6;"><strong>Razlog:</strong> ${rejectionReason}</p>` : ''}
                 <p style="color:#555;line-height:1.6;">
@@ -265,7 +265,7 @@ async function notifyStatusChange(reservation, newStatus, rejectionReason) {
           <div style="background:#0A1229;padding:20px;border-radius:0 0 12px 12px;text-align:center;">
             <p style="color:#FFD700;margin:0;font-size:14px;font-weight:bold;">Adventure Kingdom</p>
             <p style="color:rgba(255,255,255,0.5);margin:4px 0 0;font-size:12px;">
-              Setaliste dr. Franje Tudmana 4a, 20207 Srebreno
+              Šetalište dr. Franje Tuđmana 4a, 20207 Srebreno
             </p>
           </div>
         </div>

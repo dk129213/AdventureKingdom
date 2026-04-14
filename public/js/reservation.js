@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(data.parent_email)) {
-      showMessage(lang === 'hr' ? 'Molimo unesite ispravnu email adresu.' : 'Please enter a valid email address.', 'error');
+      showMessage(lang === 'hr' ? 'Molimo unesite ispravnu e-mail adresu.' : 'Please enter a valid email address.', 'error');
       return;
     }
 
@@ -278,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         showMessage(
           lang === 'hr'
-            ? `Hvala! Vasa rezervacija je poslana. Procijenjeni iznos: ${result.estimated_total}\u20AC. Kontaktirat cemo vas u roku 48 sati.`
+            ? `Hvala! Vaša rezervacija je poslana. Procijenjeni iznos: ${result.estimated_total}\u20AC. Kontaktirat ćemo vas u roku 48 sati.`
             : `Thank you! Your reservation has been submitted. Estimated total: ${result.estimated_total}\u20AC. We will contact you within 48 hours.`,
           'success'
         );
@@ -286,10 +286,10 @@ document.addEventListener('DOMContentLoaded', () => {
         form.reset();
         resetSlotStyles();
       } else {
-        showMessage(result.error || (lang === 'hr' ? 'Greska pri slanju.' : 'Submission error.'), 'error');
+        showMessage(result.error || (lang === 'hr' ? 'Greška pri slanju.' : 'Submission error.'), 'error');
       }
     } catch (err) {
-      showMessage(lang === 'hr' ? 'Greska u mrezi. Pokusajte ponovno.' : 'Network error. Please try again.', 'error');
+      showMessage(lang === 'hr' ? 'Greška u mreži. Pokušajte ponovno.' : 'Network error. Please try again.', 'error');
     } finally {
       submitBtn.disabled = false;
       submitBtn.style.opacity = '';
