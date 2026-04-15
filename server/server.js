@@ -50,7 +50,7 @@ app.use(helmet({
       imgSrc: ["'self'", "data:", "https:"],
       connectSrc: ["'self'"],
       formAction: ["'self'"],
-      frameSrc: ["'self'", "https://www.google.com"],
+      frameSrc: ["'self'", "https://www.google.com", "https://maps.google.com"],
       frameAncestors: ["'none'"],
       objectSrc: ["'none'"],
       baseUri: ["'self'"]
