@@ -18,7 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const fragment = document.createDocumentFragment();
       data.data.forEach(img => {
         const item = document.createElement('div');
-        item.className = 'gallery-item';
+        // animate-in class makes the item visible (page's IntersectionObserver only
+        // registers items present at DOMContentLoaded, so we add it manually here)
+        item.className = 'gallery-item animate-in';
         item.setAttribute('data-animate', '');
 
         const hrLabel = img.label_hr ? `<span class="gallery-label" data-hr>${escHtml(img.label_hr)}</span>` : '';
