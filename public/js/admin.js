@@ -31,11 +31,14 @@ document.addEventListener('DOMContentLoaded', () => {
     dashboard.classList.remove('active');
   }
 
+  // Default quick-view: show "active" (pending + upcoming confirmed)
+  let currentView = 'active';
+
   function showDashboard() {
     loginScreen.style.display = 'none';
     dashboard.classList.add('active');
     loadStats();
-    loadReservations();
+    loadReservations({ view: currentView });
     loadEvents();
     loadGallery();
   }
@@ -92,6 +95,14 @@ document.addEventListener('DOMContentLoaded', () => {
     tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:#999;">Loading...</td></tr>';
     try {
       const query = new URLSearchParams();
+      // Quick-view takes precedence over detailed filters
+      if (params.view && params.view !== 'all') {
+        if (params.view === 'pending') {
+          query.set('status', 'pending');
+        } else {
+          query.set('view', params.view);
+        }
+      }
       if (params.status) query.set('status', params.status);
       if (params.date) query.set('date', params.date);
       if (params.search) query.set('search', params.search);
@@ -122,6 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <button class="action-btn view" data-action="view" data-id="${r.id}">View</button>
             ${r.status==='pending'?`<button class="action-btn confirm" data-action="confirm" data-id="${r.id}">Confirm</button><button class="action-btn reject" data-action="reject" data-id="${r.id}">Reject</button>`:''}
             ${r.status==='confirmed'?`<button class="action-btn reject" data-action="cancel" data-id="${r.id}">Cancel</button>`:''}
+            <button class="action-btn delete" data-action="delete" data-id="${r.id}" title="Permanently delete">&#x1F5D1;</button>
           </td>
         </tr>
       `).join('');
@@ -140,19 +152,66 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (action === 'confirm') updateStatus(id, 'confirmed');
     else if (action === 'reject') openRejectModal(id);
     else if (action === 'cancel') updateStatus(id, 'cancelled');
+    else if (action === 'delete') deleteReservation(id);
+  });
+
+  // --- Quick-view tabs (Active / Today / Upcoming / Pending / Archive / All) ---
+  document.getElementById('quickViewTabs').addEventListener('click', (e) => {
+    const tab = e.target.closest('.quick-tab');
+    if (!tab) return;
+    document.querySelectorAll('.quick-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentView = tab.dataset.view;
+    // Clear detailed filters when switching quick-view
+    document.getElementById('filterStatus').value = '';
+    document.getElementById('filterDate').value = '';
+    document.getElementById('filterSearch').value = '';
+    loadReservations({ view: currentView });
   });
 
   document.getElementById('filterBtn').addEventListener('click', () => {
-    loadReservations({
-      status: document.getElementById('filterStatus').value,
-      date: document.getElementById('filterDate').value,
-      search: document.getElementById('filterSearch').value
-    });
+    const status = document.getElementById('filterStatus').value;
+    const date = document.getElementById('filterDate').value;
+    const search = document.getElementById('filterSearch').value;
+    // Using detailed filter overrides quick-view
+    if (status || date || search) {
+      document.querySelectorAll('.quick-tab').forEach(t => t.classList.remove('active'));
+    }
+    loadReservations({ status, date, search });
+  });
+
+  document.getElementById('clearFilterBtn').addEventListener('click', () => {
+    document.getElementById('filterStatus').value = '';
+    document.getElementById('filterDate').value = '';
+    document.getElementById('filterSearch').value = '';
+    // Go back to default Active view
+    document.querySelectorAll('.quick-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector('.quick-tab[data-view="active"]').classList.add('active');
+    currentView = 'active';
+    loadReservations({ view: currentView });
   });
 
   document.getElementById('filterSearch').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') document.getElementById('filterBtn').click();
   });
+
+  // --- Permanently delete reservation (admin only) ---
+  async function deleteReservation(id) {
+    if (!confirm('Permanently delete this reservation? This cannot be undone.')) return;
+    try {
+      const res = await Auth.apiFetch(`/api/reservations/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        loadStats();
+        loadReservations({ view: currentView });
+      } else {
+        alert('Delete failed: ' + (data.error || 'Unknown error'));
+      }
+    } catch (err) {
+      console.error('Delete error:', err);
+      alert('Failed to delete reservation.');
+    }
+  }
 
   // --- View Reservation Detail ---
   async function viewReservation(id) {
@@ -197,11 +256,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
       if (data.success) {
         loadStats();
-        loadReservations({
-          status: document.getElementById('filterStatus').value,
-          date: document.getElementById('filterDate').value,
-          search: document.getElementById('filterSearch').value
-        });
+        // Reload using the active quick-view (or detailed filters if one is set)
+        const status = document.getElementById('filterStatus').value;
+        const date = document.getElementById('filterDate').value;
+        const search = document.getElementById('filterSearch').value;
+        if (status || date || search) {
+          loadReservations({ status, date, search });
+        } else {
+          loadReservations({ view: currentView });
+        }
       } else {
         alert('Failed: ' + (data.error || 'Unknown error'));
       }

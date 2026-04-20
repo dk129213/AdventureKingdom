@@ -154,6 +154,26 @@ const stmts = {
     ORDER BY party_date ASC, time_slot ASC
   `),
 
+  // "Active" = everything worth looking at NOW: pending (any date) + upcoming confirmed
+  getActiveReservations: db.prepare(`
+    SELECT * FROM reservations
+    WHERE status = 'pending'
+       OR (status = 'confirmed' AND party_date >= date('now', 'localtime'))
+    ORDER BY party_date ASC, time_slot ASC
+  `),
+
+  // "Archived" = old (past date) or rejected/cancelled
+  getArchivedReservations: db.prepare(`
+    SELECT * FROM reservations
+    WHERE status IN ('rejected', 'cancelled')
+       OR (status = 'confirmed' AND party_date < date('now', 'localtime'))
+    ORDER BY party_date DESC, time_slot ASC
+  `),
+
+  deleteReservation: db.prepare(`
+    DELETE FROM reservations WHERE id = ?
+  `),
+
   // Events
   getPublishedEvents: db.prepare(`
     SELECT * FROM events

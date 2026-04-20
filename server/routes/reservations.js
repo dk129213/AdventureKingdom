@@ -1,6 +1,6 @@
 const express = require('express');
 const { db, stmts, calculateTotal } = require('../database');
-const { requireAuth, requireStaff } = require('../middleware/auth');
+const { requireAuth, requireStaff, requireRole } = require('../middleware/auth');
 const { reservationLimiter } = require('../middleware/rateLimiter');
 const { notifyOwner, notifyCustomer, notifyStatusChange } = require('../email');
 
@@ -200,10 +200,17 @@ router.get('/stats/overview', requireAuth, requireStaff, (req, res) => {
 // --- STAFF: List reservations ---
 router.get('/', requireAuth, requireStaff, (req, res) => {
   try {
-    const { status, date, search, upcoming } = req.query;
+    const { status, date, search, upcoming, view } = req.query;
     let reservations;
 
-    if (upcoming === 'true') {
+    // "view" takes precedence — named quick-filter buckets
+    if (view === 'active') {
+      reservations = stmts.getActiveReservations.all();
+    } else if (view === 'archive') {
+      reservations = stmts.getArchivedReservations.all();
+    } else if (view === 'today') {
+      reservations = stmts.getTodayReservations.all();
+    } else if (view === 'upcoming' || upcoming === 'true') {
       reservations = stmts.getUpcomingReservations.all();
     } else if (date && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
       reservations = stmts.getReservationsByDate.all(date);
@@ -277,6 +284,23 @@ router.patch('/:id/status', requireAuth, requireStaff, (req, res) => {
     }
   } catch (err) {
     console.error('Update status error:', err);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
+// --- ADMIN: Permanently delete a reservation (admin only — staff cannot delete) ---
+router.delete('/:id', requireAuth, requireRole('admin'), (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id) || id < 1) return res.status(400).json({ error: 'Invalid ID.' });
+
+    const existing = stmts.getReservationById.get(id);
+    if (!existing) return res.status(404).json({ error: 'Reservation not found.' });
+
+    stmts.deleteReservation.run(id);
+    res.json({ success: true, message: 'Reservation deleted.' });
+  } catch (err) {
+    console.error('Delete reservation error:', err);
     res.status(500).json({ error: 'Internal server error.' });
   }
 });
