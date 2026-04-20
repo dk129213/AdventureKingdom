@@ -1,6 +1,7 @@
 const path = require('path');
-// Load .env from the project root with an absolute path (Passenger doesn't always set cwd correctly)
-require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+// Load .env from the project root with an absolute path (Passenger doesn't always set cwd correctly).
+// override:true ensures our .env values win over any empty vars Passenger pre-sets.
+require('dotenv').config({ path: path.join(__dirname, '..', '.env'), override: true });
 
 const express = require('express');
 const helmet = require('helmet');
