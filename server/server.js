@@ -1,7 +1,8 @@
-require('dotenv').config();
+const path = require('path');
+// Load .env from the project root with an absolute path (Passenger doesn't always set cwd correctly)
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 const express = require('express');
-const path = require('path');
 const helmet = require('helmet');
 const cors = require('cors');
 const crypto = require('crypto');
