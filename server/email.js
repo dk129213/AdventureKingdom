@@ -18,6 +18,17 @@ const transporter = nodemailer.createTransport({
   family: 4
 });
 
+// HTML escape to prevent XSS in email templates (user-controlled fields)
+function esc(value) {
+  if (value === undefined || value === null) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 const SLOT_NAMES = {
   'morning': '9:00 - 11:00',
   'afternoon': '12:00 - 14:00',
@@ -35,7 +46,7 @@ async function notifyOwner(reservation) {
     await transporter.sendMail({
       from: `"Adventure Kingdom" <${process.env.SMTP_EMAIL}>`,
       to: process.env.NOTIFY_EMAIL,
-      subject: `Nova rezervacija #${r.id} - ${r.child_name} (${r.party_date})`,
+      subject: `Nova rezervacija #${r.id} - ${esc(r.child_name)} (${esc(r.party_date)})`,
       html: `
         <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
           <div style="background:#1A3A8F;color:white;padding:20px 24px;border-radius:12px 12px 0 0;">
@@ -45,24 +56,24 @@ async function notifyOwner(reservation) {
           <div style="background:#f9f9f9;padding:24px;border:1px solid #e0e0e0;border-top:none;border-radius:0 0 12px 12px;">
             <h3 style="color:#1A3A8F;margin-top:0;">Podaci o rezervaciji #${r.id}</h3>
             <table style="width:100%;border-collapse:collapse;">
-              <tr><td style="padding:8px 0;font-weight:bold;color:#555;width:40%;">Roditelj:</td><td style="padding:8px 0;">${r.parent_name}</td></tr>
-              <tr><td style="padding:8px 0;font-weight:bold;color:#555;">Telefon:</td><td style="padding:8px 0;">${r.parent_phone}</td></tr>
-              <tr><td style="padding:8px 0;font-weight:bold;color:#555;">Email:</td><td style="padding:8px 0;"><a href="mailto:${r.parent_email}">${r.parent_email}</a></td></tr>
+              <tr><td style="padding:8px 0;font-weight:bold;color:#555;width:40%;">Roditelj:</td><td style="padding:8px 0;">${esc(r.parent_name)}</td></tr>
+              <tr><td style="padding:8px 0;font-weight:bold;color:#555;">Telefon:</td><td style="padding:8px 0;">${esc(r.parent_phone)}</td></tr>
+              <tr><td style="padding:8px 0;font-weight:bold;color:#555;">Email:</td><td style="padding:8px 0;"><a href="mailto:${esc(r.parent_email)}">${esc(r.parent_email)}</a></td></tr>
               <tr><td colspan="2" style="border-top:1px solid #e0e0e0;padding:4px 0;"></td></tr>
-              <tr><td style="padding:8px 0;font-weight:bold;color:#555;">Slavljenik:</td><td style="padding:8px 0;">${r.child_name} (${r.child_age} god.)</td></tr>
-              <tr><td style="padding:8px 0;font-weight:bold;color:#555;">Datum:</td><td style="padding:8px 0;font-weight:bold;color:#1A3A8F;">${r.party_date}</td></tr>
-              <tr><td style="padding:8px 0;font-weight:bold;color:#555;">Termin:</td><td style="padding:8px 0;">${SLOT_NAMES[r.time_slot] || r.time_slot}</td></tr>
-              <tr><td style="padding:8px 0;font-weight:bold;color:#555;">Tema:</td><td style="padding:8px 0;">${THEME_NAMES[r.theme] || r.theme}</td></tr>
-              <tr><td style="padding:8px 0;font-weight:bold;color:#555;">Paket:</td><td style="padding:8px 0;">${PKG_NAMES[r.package] || r.package}</td></tr>
+              <tr><td style="padding:8px 0;font-weight:bold;color:#555;">Slavljenik:</td><td style="padding:8px 0;">${esc(r.child_name)} (${esc(r.child_age)} god.)</td></tr>
+              <tr><td style="padding:8px 0;font-weight:bold;color:#555;">Datum:</td><td style="padding:8px 0;font-weight:bold;color:#1A3A8F;">${esc(r.party_date)}</td></tr>
+              <tr><td style="padding:8px 0;font-weight:bold;color:#555;">Termin:</td><td style="padding:8px 0;">${esc(SLOT_NAMES[r.time_slot] || r.time_slot)}</td></tr>
+              <tr><td style="padding:8px 0;font-weight:bold;color:#555;">Tema:</td><td style="padding:8px 0;">${esc(THEME_NAMES[r.theme] || r.theme)}</td></tr>
+              <tr><td style="padding:8px 0;font-weight:bold;color:#555;">Paket:</td><td style="padding:8px 0;">${esc(PKG_NAMES[r.package] || r.package)}</td></tr>
               <tr><td colspan="2" style="border-top:1px solid #e0e0e0;padding:4px 0;"></td></tr>
-              <tr><td style="padding:8px 0;font-weight:bold;color:#555;">Djeca:</td><td style="padding:8px 0;">${r.num_children}</td></tr>
-              <tr><td style="padding:8px 0;font-weight:bold;color:#555;">Odrasli:</td><td style="padding:8px 0;">${r.num_adults}</td></tr>
-              ${r.addon_pizza ? `<tr><td style="padding:8px 0;font-weight:bold;color:#555;">Dodatna pizza:</td><td style="padding:8px 0;">${r.addon_pizza}x (${r.addon_pizza * 10}\u20AC)</td></tr>` : ''}
-              ${r.addon_cake ? `<tr><td style="padding:8px 0;font-weight:bold;color:#555;">Dodatna torta:</td><td style="padding:8px 0;">${r.addon_cake}x (${r.addon_cake * 20}\u20AC)</td></tr>` : ''}
-              ${r.addon_extra_child ? `<tr><td style="padding:8px 0;font-weight:bold;color:#555;">Dodatna djeca:</td><td style="padding:8px 0;">${r.addon_extra_child}x (${r.addon_extra_child * 8}\u20AC)</td></tr>` : ''}
+              <tr><td style="padding:8px 0;font-weight:bold;color:#555;">Djeca:</td><td style="padding:8px 0;">${esc(r.num_children)}</td></tr>
+              <tr><td style="padding:8px 0;font-weight:bold;color:#555;">Odrasli:</td><td style="padding:8px 0;">${esc(r.num_adults)}</td></tr>
+              ${r.addon_pizza ? `<tr><td style="padding:8px 0;font-weight:bold;color:#555;">Dodatna pizza:</td><td style="padding:8px 0;">${esc(r.addon_pizza)}x (${r.addon_pizza * 10}\u20AC)</td></tr>` : ''}
+              ${r.addon_cake ? `<tr><td style="padding:8px 0;font-weight:bold;color:#555;">Dodatna torta:</td><td style="padding:8px 0;">${esc(r.addon_cake)}x (${r.addon_cake * 20}\u20AC)</td></tr>` : ''}
+              ${r.addon_extra_child ? `<tr><td style="padding:8px 0;font-weight:bold;color:#555;">Dodatna djeca:</td><td style="padding:8px 0;">${esc(r.addon_extra_child)}x (${r.addon_extra_child * 8}\u20AC)</td></tr>` : ''}
               <tr><td colspan="2" style="border-top:1px solid #e0e0e0;padding:4px 0;"></td></tr>
-              <tr><td style="padding:8px 0;font-weight:bold;color:#555;">Procijenjeni iznos:</td><td style="padding:8px 0;font-size:18px;font-weight:bold;color:#27AE60;">${r.estimated_total}\u20AC</td></tr>
-              ${r.notes ? `<tr><td style="padding:8px 0;font-weight:bold;color:#555;">Napomene:</td><td style="padding:8px 0;">${r.notes}</td></tr>` : ''}
+              <tr><td style="padding:8px 0;font-weight:bold;color:#555;">Procijenjeni iznos:</td><td style="padding:8px 0;font-size:18px;font-weight:bold;color:#27AE60;">${esc(r.estimated_total)}\u20AC</td></tr>
+              ${r.notes ? `<tr><td style="padding:8px 0;font-weight:bold;color:#555;">Napomene:</td><td style="padding:8px 0;">${esc(r.notes)}</td></tr>` : ''}
             </table>
             <p style="margin-top:20px;color:#888;font-size:13px;">Potvrdite ili odbijte rezervaciju na staff panelu.</p>
           </div>
@@ -93,7 +104,7 @@ async function notifyCustomer(reservation) {
 
             <!-- CROATIAN -->
             <div style="margin-bottom:28px;padding-bottom:28px;border-bottom:2px solid #e0e0e0;">
-              <h2 style="color:#1A3A8F;margin-top:0;">Hvala vam, ${r.parent_name}!</h2>
+              <h2 style="color:#1A3A8F;margin-top:0;">Hvala vam, ${esc(r.parent_name)}!</h2>
               <p style="color:#555;line-height:1.6;">
                 Zaprimili smo vaš zahtjev za rezervaciju rođendanske proslave.
                 Naš tim će pregledati vaš zahtjev i kontaktirati vas u roku od <strong>48 sati</strong>
@@ -102,12 +113,12 @@ async function notifyCustomer(reservation) {
 
               <div style="background:#FFF9E6;border:2px solid #FFD700;border-radius:8px;padding:20px;margin:20px 0;">
                 <h3 style="color:#1A3A8F;margin-top:0;">Detalji vaše rezervacije:</h3>
-                <p style="margin:6px 0;color:#333;"><strong>Slavljenik:</strong> ${r.child_name} (${r.child_age} god.)</p>
-                <p style="margin:6px 0;color:#333;"><strong>Datum:</strong> ${r.party_date}</p>
-                <p style="margin:6px 0;color:#333;"><strong>Termin:</strong> ${SLOT_NAMES[r.time_slot] || r.time_slot}</p>
-                <p style="margin:6px 0;color:#333;"><strong>Tema:</strong> ${THEME_NAMES[r.theme] || r.theme}</p>
-                <p style="margin:6px 0;color:#333;"><strong>Paket:</strong> ${PKG_NAMES[r.package] || r.package}</p>
-                <p style="margin:6px 0;color:#333;"><strong>Procijenjeni iznos:</strong> <span style="color:#27AE60;font-weight:bold;">${r.estimated_total}\u20AC</span></p>
+                <p style="margin:6px 0;color:#333;"><strong>Slavljenik:</strong> ${esc(r.child_name)} (${esc(r.child_age)} god.)</p>
+                <p style="margin:6px 0;color:#333;"><strong>Datum:</strong> ${esc(r.party_date)}</p>
+                <p style="margin:6px 0;color:#333;"><strong>Termin:</strong> ${esc(SLOT_NAMES[r.time_slot] || r.time_slot)}</p>
+                <p style="margin:6px 0;color:#333;"><strong>Tema:</strong> ${esc(THEME_NAMES[r.theme] || r.theme)}</p>
+                <p style="margin:6px 0;color:#333;"><strong>Paket:</strong> ${esc(PKG_NAMES[r.package] || r.package)}</p>
+                <p style="margin:6px 0;color:#333;"><strong>Procijenjeni iznos:</strong> <span style="color:#27AE60;font-weight:bold;">${esc(r.estimated_total)}\u20AC</span></p>
                 <p style="margin:6px 0;color:#888;font-size:13px;">Plaćanje se vrši isključivo osobno na licu mjesta.</p>
               </div>
 
@@ -120,7 +131,7 @@ async function notifyCustomer(reservation) {
 
             <!-- ENGLISH -->
             <div>
-              <h2 style="color:#1A3A8F;margin-top:0;">Thank you, ${r.parent_name}!</h2>
+              <h2 style="color:#1A3A8F;margin-top:0;">Thank you, ${esc(r.parent_name)}!</h2>
               <p style="color:#555;line-height:1.6;">
                 We have received your birthday party reservation request.
                 Our team will review your request and contact you within <strong>48 hours</strong>
@@ -129,12 +140,12 @@ async function notifyCustomer(reservation) {
 
               <div style="background:#FFF9E6;border:2px solid #FFD700;border-radius:8px;padding:20px;margin:20px 0;">
                 <h3 style="color:#1A3A8F;margin-top:0;">Your reservation details:</h3>
-                <p style="margin:6px 0;color:#333;"><strong>Birthday child:</strong> ${r.child_name} (age ${r.child_age})</p>
-                <p style="margin:6px 0;color:#333;"><strong>Date:</strong> ${r.party_date}</p>
-                <p style="margin:6px 0;color:#333;"><strong>Time slot:</strong> ${SLOT_NAMES[r.time_slot] || r.time_slot}</p>
-                <p style="margin:6px 0;color:#333;"><strong>Room:</strong> ${THEME_NAMES[r.theme] || r.theme}</p>
-                <p style="margin:6px 0;color:#333;"><strong>Package:</strong> ${PKG_NAMES[r.package] || r.package}</p>
-                <p style="margin:6px 0;color:#333;"><strong>Estimated total:</strong> <span style="color:#27AE60;font-weight:bold;">${r.estimated_total}\u20AC</span></p>
+                <p style="margin:6px 0;color:#333;"><strong>Birthday child:</strong> ${esc(r.child_name)} (age ${esc(r.child_age)})</p>
+                <p style="margin:6px 0;color:#333;"><strong>Date:</strong> ${esc(r.party_date)}</p>
+                <p style="margin:6px 0;color:#333;"><strong>Time slot:</strong> ${esc(SLOT_NAMES[r.time_slot] || r.time_slot)}</p>
+                <p style="margin:6px 0;color:#333;"><strong>Room:</strong> ${esc(THEME_NAMES[r.theme] || r.theme)}</p>
+                <p style="margin:6px 0;color:#333;"><strong>Package:</strong> ${esc(PKG_NAMES[r.package] || r.package)}</p>
+                <p style="margin:6px 0;color:#333;"><strong>Estimated total:</strong> <span style="color:#27AE60;font-weight:bold;">${esc(r.estimated_total)}\u20AC</span></p>
                 <p style="margin:6px 0;color:#888;font-size:13px;">Payment is made exclusively in person on-site.</p>
               </div>
 
@@ -173,6 +184,15 @@ async function notifyStatusChange(reservation, newStatus, rejectionReason) {
     ? `Rezervacija potvrđena! / Reservation confirmed! - Adventure Kingdom #${r.id}`
     : `Rezervacija odbijena / Reservation declined - Adventure Kingdom #${r.id}`;
 
+  const escName = esc(r.parent_name);
+  const escChild = esc(r.child_name);
+  const escAge = esc(r.child_age);
+  const escDate = esc(r.party_date);
+  const escSlot = esc(SLOT_NAMES[r.time_slot] || r.time_slot);
+  const escPkg = esc(PKG_NAMES[r.package] || r.package);
+  const escTotal = esc(r.estimated_total);
+  const escReason = esc(rejectionReason);
+
   try {
     await transporter.sendMail({
       from: `"Adventure Kingdom" <${process.env.SMTP_EMAIL}>`,
@@ -192,27 +212,27 @@ async function notifyStatusChange(reservation, newStatus, rejectionReason) {
               </div>
 
               <p style="color:#555;line-height:1.6;">
-                Poštovani/a ${r.parent_name},
+                Poštovani/a ${escName},
               </p>
               ${isConfirmed ? `
                 <p style="color:#555;line-height:1.6;">
                   Sa zadovoljstvom vam javljamo da je vaša rezervacija rođendanske proslave <strong>potvrđena</strong>!
                 </p>
                 <div style="background:#FFF9E6;border:2px solid #FFD700;border-radius:8px;padding:16px;margin:16px 0;">
-                  <p style="margin:4px 0;color:#333;"><strong>Slavljenik:</strong> ${r.child_name} (${r.child_age} god.)</p>
-                  <p style="margin:4px 0;color:#333;"><strong>Datum:</strong> ${r.party_date}</p>
-                  <p style="margin:4px 0;color:#333;"><strong>Termin:</strong> ${SLOT_NAMES[r.time_slot] || r.time_slot}</p>
-                  <p style="margin:4px 0;color:#333;"><strong>Paket:</strong> ${PKG_NAMES[r.package] || r.package}</p>
-                  <p style="margin:4px 0;color:#333;"><strong>Procijenjeni iznos:</strong> <span style="color:#27AE60;font-weight:bold;">${r.estimated_total}\u20AC</span></p>
+                  <p style="margin:4px 0;color:#333;"><strong>Slavljenik:</strong> ${escChild} (${escAge} god.)</p>
+                  <p style="margin:4px 0;color:#333;"><strong>Datum:</strong> ${escDate}</p>
+                  <p style="margin:4px 0;color:#333;"><strong>Termin:</strong> ${escSlot}</p>
+                  <p style="margin:4px 0;color:#333;"><strong>Paket:</strong> ${escPkg}</p>
+                  <p style="margin:4px 0;color:#333;"><strong>Procijenjeni iznos:</strong> <span style="color:#27AE60;font-weight:bold;">${escTotal}\u20AC</span></p>
                 </div>
                 <p style="color:#555;line-height:1.6;">
                   Plaćanje se vrši isključivo osobno na licu mjesta. Vidimo se!
                 </p>
               ` : `
                 <p style="color:#555;line-height:1.6;">
-                  Nažalost, nismo u mogućnosti potvrditi vašu rezervaciju za <strong>${r.party_date}</strong>.
+                  Nažalost, nismo u mogućnosti potvrditi vašu rezervaciju za <strong>${escDate}</strong>.
                 </p>
-                ${rejectionReason ? `<p style="color:#555;line-height:1.6;"><strong>Razlog:</strong> ${rejectionReason}</p>` : ''}
+                ${escReason ? `<p style="color:#555;line-height:1.6;"><strong>Razlog:</strong> ${escReason}</p>` : ''}
                 <p style="color:#555;line-height:1.6;">
                   Slobodno nas kontaktirajte za odabir drugog termina.
                 </p>
@@ -230,27 +250,27 @@ async function notifyStatusChange(reservation, newStatus, rejectionReason) {
               </div>
 
               <p style="color:#555;line-height:1.6;">
-                Dear ${r.parent_name},
+                Dear ${escName},
               </p>
               ${isConfirmed ? `
                 <p style="color:#555;line-height:1.6;">
                   We are happy to inform you that your birthday party reservation has been <strong>confirmed</strong>!
                 </p>
                 <div style="background:#FFF9E6;border:2px solid #FFD700;border-radius:8px;padding:16px;margin:16px 0;">
-                  <p style="margin:4px 0;color:#333;"><strong>Birthday child:</strong> ${r.child_name} (age ${r.child_age})</p>
-                  <p style="margin:4px 0;color:#333;"><strong>Date:</strong> ${r.party_date}</p>
-                  <p style="margin:4px 0;color:#333;"><strong>Time slot:</strong> ${SLOT_NAMES[r.time_slot] || r.time_slot}</p>
-                  <p style="margin:4px 0;color:#333;"><strong>Package:</strong> ${PKG_NAMES[r.package] || r.package}</p>
-                  <p style="margin:4px 0;color:#333;"><strong>Estimated total:</strong> <span style="color:#27AE60;font-weight:bold;">${r.estimated_total}\u20AC</span></p>
+                  <p style="margin:4px 0;color:#333;"><strong>Birthday child:</strong> ${escChild} (age ${escAge})</p>
+                  <p style="margin:4px 0;color:#333;"><strong>Date:</strong> ${escDate}</p>
+                  <p style="margin:4px 0;color:#333;"><strong>Time slot:</strong> ${escSlot}</p>
+                  <p style="margin:4px 0;color:#333;"><strong>Package:</strong> ${escPkg}</p>
+                  <p style="margin:4px 0;color:#333;"><strong>Estimated total:</strong> <span style="color:#27AE60;font-weight:bold;">${escTotal}\u20AC</span></p>
                 </div>
                 <p style="color:#555;line-height:1.6;">
                   Payment is made exclusively in person on-site. See you there!
                 </p>
               ` : `
                 <p style="color:#555;line-height:1.6;">
-                  Unfortunately, we are unable to confirm your reservation for <strong>${r.party_date}</strong>.
+                  Unfortunately, we are unable to confirm your reservation for <strong>${escDate}</strong>.
                 </p>
-                ${rejectionReason ? `<p style="color:#555;line-height:1.6;"><strong>Reason:</strong> ${rejectionReason}</p>` : ''}
+                ${escReason ? `<p style="color:#555;line-height:1.6;"><strong>Reason:</strong> ${escReason}</p>` : ''}
                 <p style="color:#555;line-height:1.6;">
                   Please feel free to contact us to choose a different date.
                 </p>

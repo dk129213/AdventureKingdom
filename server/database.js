@@ -210,4 +210,4 @@ const stmts = {
   `)
 };
 
-module.exports = { db, stmts, calculateTotal, PRICES };
+module.exports = { db, stmts, calculateTotal, PRICES, dbPath };

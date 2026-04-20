@@ -7,7 +7,7 @@ const cors = require('cors');
 const crypto = require('crypto');
 const compression = require('compression');
 const { globalLimiter, slowDown } = require('./middleware/rateLimiter');
-const { db } = require('./database');
+const { db, dbPath } = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -164,17 +164,18 @@ app.get('/api/admin/backup', requireAuth, requireRole('admin'), (req, res) => {
     const backupDir = path.join(process.env.DATA_DIR || path.join(__dirname, '..', 'data'), 'backups');
     if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
 
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const backupPath = path.join(backupDir, `backup-${timestamp}.db`);
+    // Server-generated timestamp, sanitized to safe characters only
+    const timestamp = new Date().toISOString().replace(/[^0-9A-Za-z]/g, '-');
+    const filename = `backup-${timestamp}.db`;
+    const backupPath = path.join(backupDir, filename);
 
-    // SQLite online backup via VACUUM INTO
-    db.exec(`VACUUM INTO '${backupPath.replace(/\\/g, '/')}'`);
-
-    res.json({
-      success: true,
-      message: `Backup created: backup-${timestamp}.db`,
-      path: backupPath
-    });
+    // Use better-sqlite3's native backup API — no SQL string concat, safe under concurrent writes
+    db.backup(backupPath)
+      .then(() => res.json({ success: true, message: `Backup created: ${filename}` }))
+      .catch((err) => {
+        console.error('Backup error:', err);
+        res.status(500).json({ error: 'Backup failed.' });
+      });
   } catch (err) {
     console.error('Backup error:', err);
     res.status(500).json({ error: 'Backup failed.' });
@@ -188,24 +189,28 @@ function runScheduledBackup() {
     const backupDir = path.join(process.env.DATA_DIR || path.join(__dirname, '..', 'data'), 'backups');
     if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
 
-    const timestamp = new Date().toISOString().split('T')[0];
-    const backupPath = path.join(backupDir, `auto-backup-${timestamp}.db`);
+    const timestamp = new Date().toISOString().split('T')[0]; // YYYY-MM-DD only
+    const filename = `auto-backup-${timestamp}.db`;
+    const backupPath = path.join(backupDir, filename);
 
     // Only backup once per day
     if (!fs.existsSync(backupPath)) {
-      db.exec(`VACUUM INTO '${backupPath.replace(/\\/g, '/')}'`);
-      console.log(`Auto-backup created: auto-backup-${timestamp}.db`);
+      db.backup(backupPath)
+        .then(() => {
+          console.log(`Auto-backup created: ${filename}`);
 
-      // Keep only last 14 daily backups
-      const files = fs.readdirSync(backupDir)
-        .filter(f => f.startsWith('auto-backup-'))
-        .sort()
-        .reverse();
+          // Keep only last 14 daily backups
+          const files = fs.readdirSync(backupDir)
+            .filter(f => f.startsWith('auto-backup-'))
+            .sort()
+            .reverse();
 
-      for (let i = 14; i < files.length; i++) {
-        fs.unlinkSync(path.join(backupDir, files[i]));
-        console.log(`Old backup removed: ${files[i]}`);
-      }
+          for (let i = 14; i < files.length; i++) {
+            fs.unlinkSync(path.join(backupDir, files[i]));
+            console.log(`Old backup removed: ${files[i]}`);
+          }
+        })
+        .catch((err) => console.error('Auto-backup error:', err));
     }
   } catch (err) {
     console.error('Scheduled backup error:', err);

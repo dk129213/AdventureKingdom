@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Allow: /rezervacija.html
+Allow: /privacy
+Allow: /terms
+
+# Block admin/staff pages from search engines
+Disallow: /admin
+Disallow: /staff
+Disallow: /admin.html
+Disallow: /staff.html
+Disallow: /api/
+
+Sitemap: https://adventurekingdom.hr/sitemap.xml

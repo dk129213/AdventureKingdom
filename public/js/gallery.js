@@ -14,22 +14,27 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(data => {
       if (!data.success || !data.data || data.data.length === 0) return;
 
-      // Admin has uploaded photos — replace the default grid
-      grid.innerHTML = data.data.map(img => {
+      // Append admin-uploaded photos after the default gallery images
+      const fragment = document.createDocumentFragment();
+      data.data.forEach(img => {
+        const item = document.createElement('div');
+        item.className = 'gallery-item';
+        item.setAttribute('data-animate', '');
+
         const hrLabel = img.label_hr ? `<span class="gallery-label" data-hr>${escHtml(img.label_hr)}</span>` : '';
         const enLabel = img.label_en ? `<span class="gallery-label" data-en>${escHtml(img.label_en)}</span>` : '';
-        return `
-          <div class="gallery-item" data-animate>
-            <div class="gallery-card">
-              <img src="/gallery-images/${encodeURIComponent(img.filename)}" alt="${escAttr(img.label_en || img.label_hr || 'Gallery')}" loading="lazy">
-              ${hrLabel}
-              ${enLabel}
-            </div>
+        item.innerHTML = `
+          <div class="gallery-card">
+            <img src="/gallery-images/${encodeURIComponent(img.filename)}" alt="${escAttr(img.label_en || img.label_hr || 'Gallery')}" loading="lazy">
+            ${hrLabel}
+            ${enLabel}
           </div>
         `;
-      }).join('');
+        fragment.appendChild(item);
+      });
+      grid.appendChild(fragment);
 
-      // Re-apply language visibility
+      // Re-apply language visibility on new items
       const lang = document.documentElement.getAttribute('data-lang') || 'hr';
       grid.querySelectorAll('[data-hr]').forEach(el => el.style.display = lang === 'hr' ? '' : 'none');
       grid.querySelectorAll('[data-en]').forEach(el => el.style.display = lang === 'en' ? '' : 'none');
