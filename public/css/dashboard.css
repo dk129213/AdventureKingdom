@@ -690,16 +690,249 @@
 /* --- Responsive --- */
 @media (max-width: 768px) {
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
-    .filter-bar { flex-direction: column; }
-    .res-table { font-size: 0.8rem; }
-    .res-table th, .res-table td { padding: 8px 10px; }
+    .filter-bar { flex-direction: column; align-items: stretch; }
+    .filter-bar select,
+    .filter-bar input,
+    .filter-bar .filter-btn { width: 100%; }
     .dash-content { padding: 16px; }
     .event-form .form-grid { grid-template-columns: 1fr; }
     .modal { padding: 20px; }
     .login-card { padding: 32px 24px; }
+    .quick-view-tabs { gap: 6px; }
+    .quick-tab { padding: 7px 12px; font-size: 0.85rem; }
+
+    /* === RESERVATIONS TABLE → CARDS on mobile === */
+    #tab-reservations .res-table-wrap {
+        background: transparent;
+        box-shadow: none;
+        overflow: visible;
+    }
+    #tab-reservations .res-table,
+    #tab-reservations .res-table tbody,
+    #tab-reservations .res-table tr,
+    #tab-reservations .res-table td {
+        display: block;
+        width: 100%;
+    }
+    #tab-reservations .res-table thead { display: none; }
+
+    #tab-reservations .res-table tr {
+        background: white;
+        border-radius: var(--radius-md);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        margin-bottom: 14px;
+        padding: 14px 16px;
+        border: 1px solid #E5E7EB;
+    }
+    #tab-reservations .res-table tr:hover td { background: transparent; }
+
+    #tab-reservations .res-table td {
+        padding: 8px 0;
+        border-bottom: 1px solid #F0F0F0;
+        text-align: left;
+        font-size: 0.92rem;
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+    #tab-reservations .res-table td:last-child {
+        border-bottom: none;
+        padding-top: 12px;
+    }
+
+    /* Inject column labels via CSS ::before */
+    #tab-reservations .res-table td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: var(--text-muted);
+        flex-shrink: 0;
+    }
+    #tab-reservations .res-table td:nth-child(1)::before { content: "ID"; }
+    #tab-reservations .res-table td:nth-child(2)::before { content: "Date"; }
+    #tab-reservations .res-table td:nth-child(3)::before { content: "Time"; }
+    #tab-reservations .res-table td:nth-child(4)::before { content: "Theme"; }
+    #tab-reservations .res-table td:nth-child(5)::before { content: "Child"; }
+    #tab-reservations .res-table td:nth-child(6)::before { content: "Parent"; align-self: flex-start; }
+    #tab-reservations .res-table td:nth-child(7)::before { content: "Package"; }
+    #tab-reservations .res-table td:nth-child(8)::before { content: "Total"; }
+    #tab-reservations .res-table td:nth-child(9)::before { content: "Status"; }
+    #tab-reservations .res-table td:nth-child(10)::before {
+        content: "Actions";
+        display: block;
+        width: 100%;
+        margin-bottom: 8px;
+    }
+    /* Right-align the value content */
+    #tab-reservations .res-table td:nth-child(6) {
+        align-items: flex-start;
+        flex-direction: row;
+    }
+
+    /* Action buttons row: full width tap targets */
+    #tab-reservations .res-table td:nth-child(10) {
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-start;
+    }
+    #tab-reservations .res-table td:nth-child(10) .action-btn {
+        flex: 1 1 auto;
+        min-width: 90px;
+        padding: 12px 14px;
+        font-size: 0.9rem;
+        margin-right: 0;
+        text-align: center;
+    }
+    #tab-reservations .res-table td:nth-child(10) .action-btn.delete {
+        flex: 0 0 auto;
+        min-width: 50px;
+    }
+
+    /* === EVENTS TABLE → CARDS on mobile === */
+    #tab-events .res-table-wrap {
+        background: transparent;
+        box-shadow: none;
+        overflow: visible;
+    }
+    #tab-events .res-table,
+    #tab-events .res-table tbody,
+    #tab-events .res-table tr,
+    #tab-events .res-table td {
+        display: block;
+        width: 100%;
+    }
+    #tab-events .res-table thead { display: none; }
+
+    #tab-events .res-table tr {
+        background: white;
+        border-radius: var(--radius-md);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        margin-bottom: 14px;
+        padding: 14px 16px;
+        border: 1px solid #E5E7EB;
+    }
+    #tab-events .res-table tr:hover td { background: transparent; }
+
+    #tab-events .res-table td {
+        padding: 8px 0;
+        border-bottom: 1px solid #F0F0F0;
+        text-align: left;
+        font-size: 0.92rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+    #tab-events .res-table td:last-child {
+        border-bottom: none;
+        padding-top: 12px;
+    }
+
+    #tab-events .res-table td::before {
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: var(--text-muted);
+        flex-shrink: 0;
+    }
+    #tab-events .res-table td:nth-child(1)::before { content: "ID"; }
+    #tab-events .res-table td:nth-child(2)::before { content: "Date"; }
+    #tab-events .res-table td:nth-child(3)::before { content: "Time"; }
+    #tab-events .res-table td:nth-child(4)::before { content: "Title (HR)"; }
+    #tab-events .res-table td:nth-child(5)::before { content: "Title (EN)"; }
+    #tab-events .res-table td:nth-child(6)::before { content: "Published"; }
+    #tab-events .res-table td:nth-child(7)::before {
+        content: "Actions";
+        display: block;
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
+    /* Action buttons row */
+    #tab-events .res-table td:nth-child(7) {
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-start;
+    }
+    #tab-events .res-table td:nth-child(7) .action-btn {
+        flex: 1 1 auto;
+        min-width: 90px;
+        padding: 12px 14px;
+        font-size: 0.9rem;
+        margin-right: 0;
+        text-align: center;
+    }
+
+    /* "No events." / "No reservations found." centered when block-displayed */
+    #tab-events .res-table tr td[colspan],
+    #tab-reservations .res-table tr td[colspan] {
+        display: block;
+        text-align: center !important;
+        padding: 30px 16px !important;
+    }
+    #tab-events .res-table tr td[colspan]::before,
+    #tab-reservations .res-table tr td[colspan]::before {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Header — stack into two clean rows on mobile */
+    .dash-header {
+        height: auto;
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch;
+        padding: 12px 16px;
+    }
+    .dash-header-left {
+        justify-content: space-between;
+        gap: 10px;
+    }
+    .dash-header-left .dash-logo {
+        font-size: 1rem;
+    }
+    .dash-header-right {
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+    }
+    .dash-header-right a {
+        color: var(--gold) !important;
+        font-size: 0.85rem !important;
+        font-weight: 600;
+        padding: 8px 14px;
+        border: 1px solid rgba(255,215,0,0.3);
+        border-radius: var(--radius-sm);
+        background: rgba(255,215,0,0.08);
+        white-space: nowrap;
+    }
+    .dash-header-right a:hover {
+        background: rgba(255,215,0,0.18);
+    }
+    .dash-logout {
+        padding: 8px 18px;
+        font-size: 0.9rem;
+    }
+
+    /* Tabs row — keep horizontal scroll for safety */
+    .dash-tabs {
+        overflow-x: auto;
+        white-space: nowrap;
+        scrollbar-width: thin;
+    }
+    .dash-tab {
+        flex: 0 0 auto;
+    }
 }
 
 @media (max-width: 480px) {
     .stats-grid { grid-template-columns: 1fr; }
-    .dash-tabs { overflow-x: auto; }
+    .quick-view-tabs { padding-bottom: 8px; }
 }

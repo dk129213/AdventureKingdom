@@ -138,6 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
         label.classList.toggle('unavailable', !slotAvailable);
         radio.disabled = !slotAvailable;
         if (!slotAvailable && radio.checked) radio.checked = false;
+        setUnavailableMessage(label, !slotAvailable);
       }
     });
 
@@ -152,6 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
           card.classList.toggle('unavailable', !avail);
           radio.disabled = !avail;
           if (!avail && radio.checked) radio.checked = false;
+          setUnavailableMessage(card, !avail);
         }
       });
     }
@@ -166,9 +168,28 @@ document.addEventListener('DOMContentLoaded', () => {
       el.classList.remove('unavailable');
       const radio = el.querySelector('input');
       if (radio) radio.disabled = false;
+      setUnavailableMessage(el, false);
     });
     const statusDiv = document.getElementById('availabilityStatus');
     if (statusDiv) statusDiv.innerHTML = '';
+  }
+
+  // Show or hide a bilingual "Not available" message inside a slot/room card.
+  function setUnavailableMessage(el, show) {
+    const existing = el.querySelector('.unavailable-msg');
+    if (show) {
+      if (existing) return;
+      const msg = document.createElement('span');
+      msg.className = 'unavailable-msg';
+      msg.innerHTML = '<span data-hr>Termin nije dostupan</span><span data-en>Not available</span>';
+      el.appendChild(msg);
+      // Apply current language visibility
+      const lang = document.documentElement.getAttribute('data-lang') || 'hr';
+      msg.querySelectorAll('[data-hr]').forEach(s => s.style.display = lang === 'hr' ? '' : 'none');
+      msg.querySelectorAll('[data-en]').forEach(s => s.style.display = lang === 'en' ? '' : 'none');
+    } else if (existing) {
+      existing.remove();
+    }
   }
 
   function showAvailabilityError(msg) {

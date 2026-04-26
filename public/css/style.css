@@ -1797,11 +1797,42 @@ img { max-width: 100%; display: block; }
 
 /* --- Availability states --- */
 .unavailable {
-    opacity: 0.4;
+    opacity: 0.55;
     pointer-events: none;
+    position: relative;
 }
 
 .unavailable input { disabled: true; }
+
+/* Red "Not available / Termin nije dostupan" badge overlaying greyed slots/rooms */
+.unavailable-msg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(204, 34, 0, 0.92);
+    color: #fff;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 6px 14px;
+    border-radius: var(--radius-lg);
+    text-align: center;
+    line-height: 1.2;
+    pointer-events: none;
+    z-index: 5;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    white-space: nowrap;
+    max-width: 90%;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+/* Inside the room cards (which have full-image background), make message stand out more */
+.room-card.unavailable .unavailable-msg {
+    font-size: 0.95rem;
+    padding: 8px 18px;
+}
 
 /* --- Cookie Consent Banner --- */
 #cookieBanner {
