@@ -191,6 +191,98 @@
         </div>
     </div>
 
+    <!-- Edit Reservation Modal (admin only) -->
+    <div id="editModal" class="modal-overlay" style="display:none;">
+        <div class="modal edit-modal">
+            <button class="modal-close" id="editModalClose">&times;</button>
+            <h3>Edit Reservation <span id="editModalId" style="color:#999;font-weight:400;"></span></h3>
+            <div class="edit-form-grid">
+                <div class="form-group">
+                    <label>Parent name</label>
+                    <input type="text" id="editParentName" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label>Parent phone</label>
+                    <input type="text" id="editParentPhone" maxlength="30">
+                </div>
+                <div class="form-group full">
+                    <label>Parent email</label>
+                    <input type="email" id="editParentEmail" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label>Child name</label>
+                    <input type="text" id="editChildName" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label>Child age</label>
+                    <input type="number" id="editChildAge" min="1" max="12">
+                </div>
+                <div class="form-group">
+                    <label>Party date</label>
+                    <input type="date" id="editPartyDate">
+                </div>
+                <div class="form-group">
+                    <label>Time slot</label>
+                    <select id="editTimeSlot">
+                        <option value="morning">Morning (9:00-11:00)</option>
+                        <option value="afternoon">Afternoon (12:00-14:00)</option>
+                        <option value="late-afternoon">Late afternoon (15:00-17:00)</option>
+                        <option value="evening">Evening (18:00-20:00)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Package</label>
+                    <select id="editPackage">
+                        <option value="lion">Lion (290€)</option>
+                        <option value="royal">Royal Party (440€)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Room (theme)</label>
+                    <select id="editTheme">
+                        <option value="forest">Enchanted Forest</option>
+                        <option value="royal">Throne Room</option>
+                        <option value="both">Both rooms (Royal)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Children</label>
+                    <input type="number" id="editNumChildren" min="1" max="50">
+                </div>
+                <div class="form-group">
+                    <label>Adults</label>
+                    <input type="number" id="editNumAdults" min="0" max="50">
+                </div>
+                <div class="form-group">
+                    <label>Extra pizza</label>
+                    <input type="number" id="editAddonPizza" min="0" max="20" value="0">
+                </div>
+                <div class="form-group">
+                    <label>Extra cake</label>
+                    <input type="number" id="editAddonCake" min="0" max="10" value="0">
+                </div>
+                <div class="form-group">
+                    <label>Extra children</label>
+                    <input type="number" id="editAddonExtraChild" min="0" max="30" value="0">
+                </div>
+                <div class="form-group full">
+                    <label>Notes</label>
+                    <textarea id="editNotes" rows="3" maxlength="1000"></textarea>
+                </div>
+            </div>
+            <label class="edit-notify-toggle">
+                <input type="checkbox" id="editNotifyCustomer">
+                <span>Email the customer about these changes</span>
+            </label>
+            <div id="editErrorMsg" class="edit-error" style="display:none;"></div>
+            <div id="editDiffPreview" class="edit-diff" style="display:none;"></div>
+            <div class="edit-actions">
+                <button class="cancel-btn" id="editCancelBtn">Cancel</button>
+                <button class="save-btn" id="editSaveBtn">Save changes</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Detail Modal (same as staff) -->
     <div id="detailModal" class="modal-overlay" style="display:none;">
         <div class="modal">

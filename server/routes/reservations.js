@@ -288,6 +288,115 @@ router.patch('/:id/status', requireAuth, requireStaff, (req, res) => {
   }
 });
 
+// --- ADMIN: Edit reservation details (admin only — staff cannot edit) ---
+// Uses the same conflict check, package limits, and validation as POST,
+// but excludes the reservation itself from the conflict check.
+const updateReservationTx = db.transaction((id, data) => {
+  // Conflict check (excluding this reservation's own row)
+  const existing = stmts.getBookedSlotsExcluding.all(data.party_date, id);
+  const sameSlot = existing.filter(r => r.time_slot === data.time_slot);
+  let isBooked = false;
+  if (data.theme === 'both') {
+    isBooked = sameSlot.length > 0;
+  } else {
+    isBooked = sameSlot.some(r => r.theme === data.theme || r.theme === 'both');
+  }
+  if (isBooked) return { conflict: true };
+
+  stmts.updateReservation.run({ ...data, id });
+  return { conflict: false };
+});
+
+router.put('/:id', requireAuth, requireRole('admin'), (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id) || id < 1) return res.status(400).json({ error: 'Invalid ID.' });
+
+    const existing = stmts.getReservationById.get(id);
+    if (!existing) return res.status(404).json({ error: 'Reservation not found.' });
+
+    const {
+      parent_name, parent_phone, parent_email,
+      child_name, child_age, party_date, theme, time_slot,
+      num_children, num_adults, package: pkg,
+      addon_pizza, addon_cake, addon_extra_child,
+      notes, notify_customer
+    } = req.body;
+
+    const errors = [];
+
+    const cleanName = sanitizeString(parent_name, 100);
+    const cleanPhone = sanitizePhone(parent_phone);
+    const cleanEmail = sanitizeEmail(parent_email);
+    const cleanChildName = sanitizeString(child_name, 100);
+
+    if (cleanName.length < 2) errors.push('Parent name is required (min 2 characters).');
+    if (cleanPhone.length < 6) errors.push('Valid phone number is required.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) errors.push('Valid email is required.');
+    if (cleanChildName.length < 1) errors.push('Child name is required.');
+
+    const age = parseInt(child_age);
+    if (isNaN(age) || age < 1 || age > 12) errors.push('Child age must be between 1 and 12.');
+
+    if (!party_date || !/^\d{4}-\d{2}-\d{2}$/.test(party_date)) errors.push('Valid date is required.');
+    if (!VALID_THEMES.includes(theme)) errors.push('Invalid theme selection.');
+    if (!VALID_SLOTS.includes(time_slot)) errors.push('Invalid time slot.');
+    if (!VALID_PACKAGES.includes(pkg)) errors.push('Invalid package selection.');
+
+    // Admin can edit reservations with past dates (no future-only restriction).
+
+    const maxChildren = pkg === 'royal' ? 50 : 25;
+    const totalChildren = (parseInt(num_children) || 0) + (parseInt(addon_extra_child) || 0);
+    if (totalChildren > maxChildren) {
+      errors.push(`Total children (${totalChildren}) exceeds maximum of ${maxChildren} for ${pkg === 'royal' ? 'Royal Party' : 'Lion'} package.`);
+    }
+
+    if (errors.length > 0) return res.status(400).json({ error: errors.join(' ') });
+
+    const pizzaQty = Math.min(20, Math.max(0, parseInt(addon_pizza) || 0));
+    const cakeQty = Math.min(10, Math.max(0, parseInt(addon_cake) || 0));
+    const extraChildQty = Math.min(30, Math.max(0, parseInt(addon_extra_child) || 0));
+    const childCount = Math.min(maxChildren, Math.max(1, parseInt(num_children) || 1));
+    const adultCount = Math.min(50, Math.max(0, parseInt(num_adults) || 0));
+
+    const estimated_total = calculateTotal(pkg, pizzaQty, cakeQty, extraChildQty);
+
+    const result = updateReservationTx(id, {
+      parent_name: cleanName,
+      parent_phone: cleanPhone,
+      parent_email: cleanEmail,
+      child_name: cleanChildName,
+      child_age: age,
+      party_date,
+      theme,
+      time_slot,
+      num_children: childCount,
+      num_adults: adultCount,
+      package: pkg,
+      addon_pizza: pizzaQty,
+      addon_cake: cakeQty,
+      addon_extra_child: extraChildQty,
+      estimated_total,
+      notes: notes ? sanitizeString(notes, 1000) : null
+    });
+
+    if (result.conflict) {
+      return res.status(409).json({ error: 'This time slot is already booked. Please choose a different time or date.' });
+    }
+
+    const updated = stmts.getReservationById.get(id);
+    res.json({ success: true, data: updated });
+
+    // Optional: notify customer that reservation was updated (re-send confirmation email)
+    if (notify_customer && updated) {
+      notifyCustomer(updated).catch(() => {});
+    }
+  } catch (err) {
+    console.error('Update reservation error:', err);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
 // --- ADMIN: Permanently delete a reservation (admin only — staff cannot delete) ---
 router.delete('/:id', requireAuth, requireRole('admin'), (req, res) => {
   try {

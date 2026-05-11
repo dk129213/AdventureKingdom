@@ -174,6 +174,37 @@ const stmts = {
     DELETE FROM reservations WHERE id = ?
   `),
 
+  // Full reservation update (admin only). Status and rejection_reason stay
+  // separate via updateReservationStatus — this one is for the editable details.
+  updateReservation: db.prepare(`
+    UPDATE reservations SET
+      parent_name = @parent_name,
+      parent_phone = @parent_phone,
+      parent_email = @parent_email,
+      child_name = @child_name,
+      child_age = @child_age,
+      party_date = @party_date,
+      theme = @theme,
+      time_slot = @time_slot,
+      num_children = @num_children,
+      num_adults = @num_adults,
+      package = @package,
+      addon_pizza = @addon_pizza,
+      addon_cake = @addon_cake,
+      addon_extra_child = @addon_extra_child,
+      estimated_total = @estimated_total,
+      notes = @notes,
+      updated_at = datetime('now')
+    WHERE id = @id
+  `),
+
+  // Booked slots EXCLUDING a given reservation id — needed for edit conflict check
+  // so that editing a reservation doesn't conflict with itself.
+  getBookedSlotsExcluding: db.prepare(`
+    SELECT time_slot, theme FROM reservations
+    WHERE party_date = ? AND status IN ('pending', 'confirmed') AND id != ?
+  `),
+
   // Events
   getPublishedEvents: db.prepare(`
     SELECT * FROM events

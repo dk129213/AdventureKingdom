@@ -131,6 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <td><span class="status-badge ${r.status}">${r.status}</span></td>
           <td>
             <button class="action-btn view" data-action="view" data-id="${r.id}">View</button>
+            <button class="action-btn edit" data-action="edit" data-id="${r.id}">Edit</button>
             ${r.status==='pending'?`<button class="action-btn confirm" data-action="confirm" data-id="${r.id}">Confirm</button><button class="action-btn reject" data-action="reject" data-id="${r.id}">Reject</button>`:''}
             ${r.status==='confirmed'?`<button class="action-btn reject" data-action="cancel" data-id="${r.id}">Cancel</button>`:''}
             <button class="action-btn delete" data-action="delete" data-id="${r.id}" title="Permanently delete">&#x1F5D1;</button>
@@ -149,6 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const id = parseInt(btn.dataset.id);
     const action = btn.dataset.action;
     if (action === 'view') viewReservation(id);
+    else if (action === 'edit') openEditModal(id);
     else if (action === 'confirm') updateStatus(id, 'confirmed');
     else if (action === 'reject') openRejectModal(id);
     else if (action === 'cancel') updateStatus(id, 'cancelled');
@@ -193,6 +195,178 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('filterSearch').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') document.getElementById('filterBtn').click();
+  });
+
+  // --- Edit reservation (admin only) ---
+  let editOriginalData = null; // snapshot of the reservation when modal opened, for diff
+
+  async function openEditModal(id) {
+    try {
+      const res = await Auth.apiFetch(`/api/reservations/${id}`);
+      const data = await res.json();
+      if (!data.success) {
+        alert('Failed to load reservation.');
+        return;
+      }
+      const r = data.data;
+      editOriginalData = r;
+
+      document.getElementById('editModalId').textContent = '#' + r.id;
+      document.getElementById('editParentName').value = r.parent_name || '';
+      document.getElementById('editParentPhone').value = r.parent_phone || '';
+      document.getElementById('editParentEmail').value = r.parent_email || '';
+      document.getElementById('editChildName').value = r.child_name || '';
+      document.getElementById('editChildAge').value = r.child_age ?? '';
+      document.getElementById('editPartyDate').value = r.party_date || '';
+      document.getElementById('editTimeSlot').value = r.time_slot || 'morning';
+      document.getElementById('editPackage').value = r.package || 'lion';
+      document.getElementById('editTheme').value = r.theme || 'forest';
+      document.getElementById('editNumChildren').value = r.num_children ?? 1;
+      document.getElementById('editNumAdults').value = r.num_adults ?? 0;
+      document.getElementById('editAddonPizza').value = r.addon_pizza ?? 0;
+      document.getElementById('editAddonCake').value = r.addon_cake ?? 0;
+      document.getElementById('editAddonExtraChild').value = r.addon_extra_child ?? 0;
+      document.getElementById('editNotes').value = r.notes || '';
+      document.getElementById('editNotifyCustomer').checked = false;
+      document.getElementById('editErrorMsg').style.display = 'none';
+      document.getElementById('editDiffPreview').style.display = 'none';
+
+      document.getElementById('editModal').style.display = 'flex';
+    } catch (err) {
+      console.error(err);
+      alert('Failed to open edit modal.');
+    }
+  }
+
+  function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
+    editOriginalData = null;
+  }
+
+  document.getElementById('editModalClose').addEventListener('click', closeEditModal);
+  document.getElementById('editCancelBtn').addEventListener('click', closeEditModal);
+
+  // Compute a human-readable diff between original and proposed values
+  function buildDiff(original, proposed) {
+    const labels = {
+      parent_name: 'Parent name', parent_phone: 'Phone', parent_email: 'Email',
+      child_name: 'Child', child_age: 'Age', party_date: 'Date',
+      time_slot: 'Time', package: 'Package', theme: 'Room',
+      num_children: 'Children', num_adults: 'Adults',
+      addon_pizza: 'Pizza addon', addon_cake: 'Cake addon',
+      addon_extra_child: 'Extra child addon', notes: 'Notes'
+    };
+    const changes = [];
+    for (const k of Object.keys(labels)) {
+      const o = String(original[k] ?? '');
+      const p = String(proposed[k] ?? '');
+      if (o !== p) changes.push({ field: labels[k], from: o || '(empty)', to: p || '(empty)' });
+    }
+    return changes;
+  }
+
+  document.getElementById('editSaveBtn').addEventListener('click', async () => {
+    if (!editOriginalData) return;
+
+    const payload = {
+      parent_name: document.getElementById('editParentName').value.trim(),
+      parent_phone: document.getElementById('editParentPhone').value.trim(),
+      parent_email: document.getElementById('editParentEmail').value.trim(),
+      child_name: document.getElementById('editChildName').value.trim(),
+      child_age: parseInt(document.getElementById('editChildAge').value) || 0,
+      party_date: document.getElementById('editPartyDate').value,
+      time_slot: document.getElementById('editTimeSlot').value,
+      package: document.getElementById('editPackage').value,
+      theme: document.getElementById('editTheme').value,
+      num_children: parseInt(document.getElementById('editNumChildren').value) || 1,
+      num_adults: parseInt(document.getElementById('editNumAdults').value) || 0,
+      addon_pizza: parseInt(document.getElementById('editAddonPizza').value) || 0,
+      addon_cake: parseInt(document.getElementById('editAddonCake').value) || 0,
+      addon_extra_child: parseInt(document.getElementById('editAddonExtraChild').value) || 0,
+      notes: document.getElementById('editNotes').value.trim(),
+      notify_customer: document.getElementById('editNotifyCustomer').checked
+    };
+
+    const errEl = document.getElementById('editErrorMsg');
+    const diffEl = document.getElementById('editDiffPreview');
+    errEl.style.display = 'none';
+
+    // If royal package selected without "both" theme, auto-set theme to both
+    if (payload.package === 'royal' && payload.theme !== 'both') {
+      payload.theme = 'both';
+    }
+    // If lion and theme is "both", default to forest
+    if (payload.package === 'lion' && payload.theme === 'both') {
+      payload.theme = 'forest';
+    }
+
+    const changes = buildDiff(editOriginalData, payload);
+    if (changes.length === 0) {
+      errEl.textContent = 'No changes to save.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    // First click: show diff for confirmation. Second click: actually submit.
+    const btn = document.getElementById('editSaveBtn');
+    if (btn.dataset.confirmReady !== 'yes') {
+      diffEl.innerHTML = '<strong>Review changes:</strong><ul>'
+        + changes.map(c => `<li><b>${esc(c.field)}:</b> <span class="diff-from">${esc(c.from)}</span> → <span class="diff-to">${esc(c.to)}</span></li>`).join('')
+        + '</ul>' + (payload.notify_customer ? '<p class="diff-notify">An updated confirmation email will be sent to the customer.</p>' : '');
+      diffEl.style.display = 'block';
+      btn.textContent = 'Confirm save';
+      btn.dataset.confirmReady = 'yes';
+      return;
+    }
+
+    // Submit
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+    try {
+      const res = await Auth.apiFetch(`/api/reservations/${editOriginalData.id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        errEl.textContent = data.error || 'Failed to save.';
+        errEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Confirm save';
+        return;
+      }
+      closeEditModal();
+      btn.dataset.confirmReady = '';
+      btn.textContent = 'Save changes';
+      btn.disabled = false;
+      loadStats();
+      const status = document.getElementById('filterStatus').value;
+      const date = document.getElementById('filterDate').value;
+      const search = document.getElementById('filterSearch').value;
+      if (status || date || search) {
+        loadReservations({ status, date, search });
+      } else {
+        loadReservations({ view: currentView });
+      }
+    } catch (err) {
+      console.error('Edit error:', err);
+      errEl.textContent = 'Network error — please try again.';
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Confirm save';
+    }
+  });
+
+  // Reset the confirm-twice state when any field changes
+  document.querySelectorAll('#editModal input, #editModal select, #editModal textarea').forEach(el => {
+    el.addEventListener('change', () => {
+      const btn = document.getElementById('editSaveBtn');
+      if (btn.dataset.confirmReady === 'yes') {
+        btn.dataset.confirmReady = '';
+        btn.textContent = 'Save changes';
+        document.getElementById('editDiffPreview').style.display = 'none';
+      }
+    });
   });
 
   // --- Permanently delete reservation (admin only) ---
