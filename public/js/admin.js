@@ -408,7 +408,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="detail-row"><span class="detail-label">Package</span><span class="detail-value">${r.package==='lion'?'Lion (290\u20AC)':'Royal (440\u20AC)'}</span></div>
         <div class="detail-row"><span class="detail-label">Children</span><span class="detail-value">${r.num_children}</span></div>
         <div class="detail-row"><span class="detail-label">Adults</span><span class="detail-value">${r.num_adults}</span></div>
-        <div class="detail-row"><span class="detail-label">Extras</span><span class="detail-value">Pizza: ${r.addon_pizza}, Cake: ${r.addon_cake}, Extra kids: ${r.addon_extra_child}</span></div>
+        <div class="detail-row"><span class="detail-label">Extras</span><span class="detail-value">Pizza: ${r.addon_pizza}, Cake: ${r.addon_cake}${r.addon_extra_child ? `, Extra kids: ${r.addon_extra_child}` : ''}</span></div>
         <div class="detail-row"><span class="detail-label">Total</span><span class="detail-value"><strong>${r.estimated_total}\u20AC</strong></span></div>
         ${r.notes?`<div class="detail-row"><span class="detail-label">Notes</span><span class="detail-value">${esc(r.notes)}</span></div>`:''}
         ${r.rejection_reason?`<div class="detail-row"><span class="detail-label">Rejection</span><span class="detail-value">${esc(r.rejection_reason)}</span></div>`:''}

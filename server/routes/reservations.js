@@ -106,9 +106,8 @@ router.post('/', reservationLimiter, (req, res) => {
     }
 
     // Max children: 25 per room (Lion), 50 for Royal (both rooms)
-    // Total = num_children + addon_extra_child
     const maxChildren = pkg === 'royal' ? 50 : 25;
-    const totalChildren = (parseInt(num_children) || 0) + (parseInt(addon_extra_child) || 0);
+    const totalChildren = parseInt(num_children) || 0;
     if (totalChildren > maxChildren) {
       errors.push(`Total children (${totalChildren}) exceeds maximum of ${maxChildren} for ${pkg === 'royal' ? 'Royal Party' : 'Lion'} package.`);
     }
@@ -120,7 +119,9 @@ router.post('/', reservationLimiter, (req, res) => {
     // Sanitize numeric add-ons (cap at reasonable max)
     const pizzaQty = Math.min(20, Math.max(0, parseInt(addon_pizza) || 0));
     const cakeQty = Math.min(10, Math.max(0, parseInt(addon_cake) || 0));
-    const extraChildQty = Math.min(30, Math.max(0, parseInt(addon_extra_child) || 0));
+    // Extra-children add-on is retired: new reservations are always 0, regardless of
+    // what the client sends. Existing rows keep their historical value.
+    const extraChildQty = 0;
     const childCount = Math.min(maxChildren, Math.max(1, parseInt(num_children) || 1));
     const adultCount = Math.min(50, Math.max(0, parseInt(num_adults) || 0));
 

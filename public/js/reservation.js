@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
       package: form.package?.value,
       addon_pizza: getQtyValue(0),
       addon_cake: getQtyValue(1),
-      addon_extra_child: getQtyValue(2),
+      addon_extra_child: 0,
       notes: form.notes.value
     };
 
@@ -258,9 +258,8 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     // Max children limits: 25 per room (Lion), 50 for Royal (both rooms)
-    // For Royal: num_children + addon_extra_child cannot exceed 50
     const maxChildren = data.package === 'royal' ? 50 : 25;
-    const totalChildren = parseInt(data.num_children) + parseInt(data.addon_extra_child || 0);
+    const totalChildren = parseInt(data.num_children) || 0;
     if (totalChildren > maxChildren) {
       showMessage(
         lang === 'hr'

@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="detail-row"><span class="detail-label">Adults</span><span class="detail-value">${r.num_adults}</span></div>
         <div class="detail-row"><span class="detail-label">Extra Pizza</span><span class="detail-value">${r.addon_pizza} (${r.addon_pizza * 10}\u20AC)</span></div>
         <div class="detail-row"><span class="detail-label">Extra Cake</span><span class="detail-value">${r.addon_cake} (${r.addon_cake * 20}\u20AC)</span></div>
-        <div class="detail-row"><span class="detail-label">Extra Children</span><span class="detail-value">${r.addon_extra_child} (${r.addon_extra_child * 8}\u20AC)</span></div>
+        ${r.addon_extra_child ? `<div class="detail-row"><span class="detail-label">Extra Children</span><span class="detail-value">${r.addon_extra_child} (${r.addon_extra_child * 8}\u20AC)</span></div>` : ''}
         <div class="detail-row"><span class="detail-label">Estimated Total</span><span class="detail-value"><strong>${r.estimated_total}\u20AC</strong></span></div>
         ${r.notes ? `<div class="detail-row"><span class="detail-label">Notes</span><span class="detail-value">${esc(r.notes)}</span></div>` : ''}
         ${r.rejection_reason ? `<div class="detail-row"><span class="detail-label">Rejection Reason</span><span class="detail-value">${esc(r.rejection_reason)}</span></div>` : ''}
