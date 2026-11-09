@@ -4,12 +4,14 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env'), override: true });
 
 const express = require('express');
+const fs = require('fs');
 const helmet = require('helmet');
 const cors = require('cors');
 const crypto = require('crypto');
 const compression = require('compression');
 const { globalLimiter, slowDown } = require('./middleware/rateLimiter');
 const { db, dbPath } = require('./database');
+const { stampAssets } = require('./assetVersion');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -90,6 +92,28 @@ app.use((req, res, next) => {
   next();
 });
 
+// --- Pages ---
+// Served by hand rather than by express.static so their asset URLs can be stamped with a
+// version. See server/assetVersion.js for why that is necessary on this host.
+function sendPage(res, fileName) {
+  const filePath = path.join(__dirname, '..', 'public', fileName);
+  fs.readFile(filePath, 'utf8', (err, html) => {
+    if (err) return res.status(404).send('Not found');
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.send(stampAssets(html));
+  });
+}
+
+app.use((req, res, next) => {
+  if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+  const name = req.path === '/' ? 'index.html' : req.path.slice(1);
+  // Top-level .html pages only; anything else falls through to express.static.
+  if (!name.endsWith('.html') || name.includes('/') || name.includes('..')) return next();
+  if (!fs.existsSync(path.join(__dirname, '..', 'public', name))) return next();
+  return sendPage(res, name);
+});
+
 // --- Static files (no caching during development, cache images in production) ---
 app.use(express.static(path.join(__dirname, '..', 'public'), {
   etag: true,
@@ -142,21 +166,10 @@ app.post('/api/reservations', csrfProtection);
 app.use('/api/reservations', reservationRoutes);
 
 // --- Page routes (serve HTML for dashboard pages) ---
-app.get('/staff', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'public', 'staff.html'));
-});
-
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'public', 'admin.html'));
-});
-
-app.get('/privacy', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'public', 'privacy.html'));
-});
-
-app.get('/terms', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'public', 'terms.html'));
-});
+app.get('/staff', (req, res) => sendPage(res, 'staff.html'));
+app.get('/admin', (req, res) => sendPage(res, 'admin.html'));
+app.get('/privacy', (req, res) => sendPage(res, 'privacy.html'));
+app.get('/terms', (req, res) => sendPage(res, 'terms.html'));
 
 // --- Database backup endpoint (admin only) ---
 const { requireAuth, requireRole } = require('./middleware/auth');

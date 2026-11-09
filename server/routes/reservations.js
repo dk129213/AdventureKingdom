@@ -151,7 +151,23 @@ router.post('/', reservationLimiter, (req, res) => {
 
     // Add-ons chosen from the catalogue. Prices come from the catalogue, never the client.
     // Anything unbookable is dropped rather than failing the whole reservation.
-    const { lines: addonLines, total: addonsTotal } = normalizeAddons(addons, {
+    //
+    // A page cached from before the add-on catalogue existed posts only the legacy pizza
+    // and cake quantities and no `addons` list at all. Rebuild the lines from those so a
+    // stale client can never book without being charged. It still cannot order the newer
+    // add-ons -- its script has no way to read them -- so the warning below makes the
+    // stale client visible in the logs rather than letting it pass unnoticed.
+    let addonSelection = addons;
+    if (!Array.isArray(addons)) {
+      addonSelection = [];
+      if (pizzaQty > 0) addonSelection.push({ id: 'addon_pizza', quantity: pizzaQty });
+      if (cakeQty > 0) addonSelection.push({ id: 'addon_cake', quantity: cakeQty });
+      if (addonSelection.length > 0) {
+        console.warn('Reservation posted without an add-on list — stale cached client; rebuilt from legacy fields.');
+      }
+    }
+
+    const { lines: addonLines, total: addonsTotal } = normalizeAddons(addonSelection, {
       numChildren: childCount,
     });
 
