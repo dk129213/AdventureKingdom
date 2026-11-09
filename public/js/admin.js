@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const slots = { 'morning':'9:00-11:00','afternoon':'12:00-14:00','late-afternoon':'15:00-17:00','evening':'18:00-20:00' };
-      const themes = { 'forest':'Enchanted Forest','royal':'Royal Room' };
+      const themes = { 'forest':'Enchanted Forest','royal':'Throne Room' };
 
       tbody.innerHTML = data.data.map(r => `
         <tr>
@@ -199,6 +199,88 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Edit reservation (admin only) ---
   let editOriginalData = null; // snapshot of the reservation when modal opened, for diff
+  let addonCatalogue = null;   // fetched once; the server is the single source of truth
+
+  async function getAddonCatalogue() {
+    if (addonCatalogue) return addonCatalogue;
+    const res = await fetch('/api/reservations/addons');
+    const data = await res.json();
+    addonCatalogue = (data && data.success && Array.isArray(data.data)) ? data.data : [];
+    return addonCatalogue;
+  }
+
+  // Build one row per add-on: a quantity box for per-unit items, a checkbox for the rest.
+  // Add-ons retired from the catalogue appear only when the booking already carries them,
+  // so they can be reduced or removed but never added back.
+  function renderAddonEditor(catalogue, reservation) {
+    const booked = reservation.addons || [];
+    const bookedById = Object.fromEntries(booked.map(a => [a.addon_id, a]));
+    const retired = booked.filter(a => a.retired).map(a => ({
+      id: a.addon_id, nameEn: a.nameEn, price: a.unit_price, pricingMode: 'unit', retired: true
+    }));
+
+    const rows = [...catalogue, ...retired].map((item) => {
+      const on = bookedById[item.id];
+      // An existing line keeps the price it was booked at.
+      const price = on ? on.unit_price : item.price;
+      const label = esc(item.nameEn) + (item.retired ? ' <em>(retired)</em>' : '');
+
+      if (item.pricingMode === 'unit') {
+        return '<div class="edit-addon-row" data-addon-id="' + esc(item.id) + '" data-pricing-mode="unit">'
+          + '<span class="edit-addon-name">' + label + '</span>'
+          + '<span class="edit-addon-price">' + price + '\u20AC each</span>'
+          + '<input type="number" class="edit-addon-qty" min="0" max="' + (item.retired ? 30 : 20) + '" value="' + (on ? on.quantity : 0) + '">'
+          + '</div>';
+      }
+
+      const note = item.pricingMode === 'per_child' ? price + '\u20AC per child' : price + '\u20AC per party';
+      return '<div class="edit-addon-row" data-addon-id="' + esc(item.id) + '" data-pricing-mode="' + esc(item.pricingMode) + '">'
+        + '<label class="edit-addon-check">'
+        + '<input type="checkbox" class="edit-addon-toggle"' + (on ? ' checked' : '') + '>'
+        + '<span class="edit-addon-name">' + label + '</span>'
+        + '</label>'
+        + '<span class="edit-addon-price">' + note + '</span>'
+        + '</div>';
+    });
+
+    document.getElementById('editAddons').innerHTML = rows.join('');
+  }
+
+  // What the form is asking for, in the shape the API expects.
+  function collectAddonSelection() {
+    const chosen = [];
+    document.querySelectorAll('#editAddons .edit-addon-row').forEach((row) => {
+      const id = row.getAttribute('data-addon-id');
+      if (row.getAttribute('data-pricing-mode') === 'unit') {
+        const qty = parseInt(row.querySelector('.edit-addon-qty').value) || 0;
+        if (qty > 0) chosen.push({ id, quantity: qty });
+      } else if (row.querySelector('.edit-addon-toggle').checked) {
+        chosen.push({ id, quantity: 1 });
+      }
+    });
+    return chosen;
+  }
+
+  // Human-readable "what the add-ons will become", for the confirm step.
+  function describeAddons(selection, numChildren) {
+    if (!selection.length) return '(none)';
+    const byId = Object.fromEntries((addonCatalogue || []).map(a => [a.id, a]));
+    const bookedById = Object.fromEntries(((editOriginalData && editOriginalData.addons) || []).map(a => [a.addon_id, a]));
+    return selection.map((sel) => {
+      const item = byId[sel.id];
+      const on = bookedById[sel.id];
+      const name = item ? item.nameEn : (on ? on.nameEn : sel.id);
+      const mode = item ? item.pricingMode : 'unit';
+      const qty = mode === 'flat' ? 1 : (mode === 'per_child' ? Math.max(1, numChildren || 1) : sel.quantity);
+      return qty > 1 ? name + ' \u00D7' + qty : name;
+    }).join(', ');
+  }
+
+  function describeBookedAddons(reservation) {
+    const booked = (reservation && reservation.addons) || [];
+    if (!booked.length) return '(none)';
+    return booked.map(a => (a.quantity > 1 ? a.nameEn + ' \u00D7' + a.quantity : a.nameEn)).join(', ');
+  }
 
   async function openEditModal(id) {
     try {
@@ -223,9 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('editTheme').value = r.theme || 'forest';
       document.getElementById('editNumChildren').value = r.num_children ?? 1;
       document.getElementById('editNumAdults').value = r.num_adults ?? 0;
-      document.getElementById('editAddonPizza').value = r.addon_pizza ?? 0;
-      document.getElementById('editAddonCake').value = r.addon_cake ?? 0;
-      document.getElementById('editAddonExtraChild').value = r.addon_extra_child ?? 0;
+      renderAddonEditor(await getAddonCatalogue(), r);
       document.getElementById('editNotes').value = r.notes || '';
       document.getElementById('editNotifyCustomer').checked = false;
       document.getElementById('editErrorMsg').style.display = 'none';
@@ -253,8 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
       child_name: 'Child', child_age: 'Age', party_date: 'Date',
       time_slot: 'Time', package: 'Package', theme: 'Room',
       num_children: 'Children', num_adults: 'Adults',
-      addon_pizza: 'Pizza addon', addon_cake: 'Cake addon',
-      addon_extra_child: 'Extra child addon', notes: 'Notes'
+      notes: 'Notes'
     };
     const changes = [];
     for (const k of Object.keys(labels)) {
@@ -262,6 +341,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const p = String(proposed[k] ?? '');
       if (o !== p) changes.push({ field: labels[k], from: o || '(empty)', to: p || '(empty)' });
     }
+
+    // Add-ons are a list, not a field, so compare their descriptions.
+    const addonsFrom = describeBookedAddons(original);
+    const addonsTo = describeAddons(proposed.addons || [], proposed.num_children);
+    if (addonsFrom !== addonsTo) changes.push({ field: 'Add-ons', from: addonsFrom, to: addonsTo });
+
     return changes;
   }
 
@@ -280,9 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
       theme: document.getElementById('editTheme').value,
       num_children: parseInt(document.getElementById('editNumChildren').value) || 1,
       num_adults: parseInt(document.getElementById('editNumAdults').value) || 0,
-      addon_pizza: parseInt(document.getElementById('editAddonPizza').value) || 0,
-      addon_cake: parseInt(document.getElementById('editAddonCake').value) || 0,
-      addon_extra_child: parseInt(document.getElementById('editAddonExtraChild').value) || 0,
+      addons: collectAddonSelection(),
       notes: document.getElementById('editNotes').value.trim(),
       notify_customer: document.getElementById('editNotifyCustomer').checked
     };
@@ -357,16 +440,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Reset the confirm-twice state when any field changes
-  document.querySelectorAll('#editModal input, #editModal select, #editModal textarea').forEach(el => {
-    el.addEventListener('change', () => {
-      const btn = document.getElementById('editSaveBtn');
-      if (btn.dataset.confirmReady === 'yes') {
-        btn.dataset.confirmReady = '';
-        btn.textContent = 'Save changes';
-        document.getElementById('editDiffPreview').style.display = 'none';
-      }
-    });
+  // Reset the confirm-twice state when any field changes. Delegated, because the add-on
+  // rows are built fresh each time the modal opens.
+  document.getElementById('editModal').addEventListener('change', (e) => {
+    if (!e.target.matches('input, select, textarea')) return;
+    const btn = document.getElementById('editSaveBtn');
+    if (btn.dataset.confirmReady === 'yes') {
+      btn.dataset.confirmReady = '';
+      btn.textContent = 'Save changes';
+      document.getElementById('editDiffPreview').style.display = 'none';
+    }
   });
 
   // --- Permanently delete reservation (admin only) ---
@@ -404,11 +487,13 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="detail-row"><span class="detail-label">Child</span><span class="detail-value">${esc(r.child_name)} (${r.child_age}yr)</span></div>
         <div class="detail-row"><span class="detail-label">Date</span><span class="detail-value">${r.party_date}</span></div>
         <div class="detail-row"><span class="detail-label">Time</span><span class="detail-value">${slots[r.time_slot]||r.time_slot}</span></div>
-        <div class="detail-row"><span class="detail-label">Theme</span><span class="detail-value">${r.theme==='forest'?'Enchanted Forest':'Royal Room'}</span></div>
+        <div class="detail-row"><span class="detail-label">Theme</span><span class="detail-value">${r.theme==='forest'?'Enchanted Forest':'Throne Room'}</span></div>
         <div class="detail-row"><span class="detail-label">Package</span><span class="detail-value">${r.package==='lion'?'Lion (290\u20AC)':'Royal (440\u20AC)'}</span></div>
         <div class="detail-row"><span class="detail-label">Children</span><span class="detail-value">${r.num_children}</span></div>
         <div class="detail-row"><span class="detail-label">Adults</span><span class="detail-value">${r.num_adults}</span></div>
-        <div class="detail-row"><span class="detail-label">Extras</span><span class="detail-value">Pizza: ${r.addon_pizza}, Cake: ${r.addon_cake}${r.addon_extra_child ? `, Extra kids: ${r.addon_extra_child}` : ''}</span></div>
+        ${(r.addons || []).length
+          ? r.addons.map(a => `<div class="detail-row"><span class="detail-label">${esc(a.nameEn)}</span><span class="detail-value">${a.quantity} × ${a.unit_price}€ = ${a.line_total}€</span></div>`).join('')
+          : '<div class="detail-row"><span class="detail-label">Extras</span><span class="detail-value">None</span></div>'}
         <div class="detail-row"><span class="detail-label">Total</span><span class="detail-value"><strong>${r.estimated_total}\u20AC</strong></span></div>
         ${r.notes?`<div class="detail-row"><span class="detail-label">Notes</span><span class="detail-value">${esc(r.notes)}</span></div>`:''}
         ${r.rejection_reason?`<div class="detail-row"><span class="detail-label">Rejection</span><span class="detail-value">${esc(r.rejection_reason)}</span></div>`:''}

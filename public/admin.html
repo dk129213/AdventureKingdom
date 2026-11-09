@@ -253,17 +253,10 @@
                     <label>Adults</label>
                     <input type="number" id="editNumAdults" min="0" max="50">
                 </div>
-                <div class="form-group">
-                    <label>Extra pizza</label>
-                    <input type="number" id="editAddonPizza" min="0" max="20" value="0">
-                </div>
-                <div class="form-group">
-                    <label>Extra cake</label>
-                    <input type="number" id="editAddonCake" min="0" max="10" value="0">
-                </div>
-                <div class="form-group">
-                    <label>Extra children</label>
-                    <input type="number" id="editAddonExtraChild" min="0" max="30" value="0">
+                <div class="form-group full">
+                    <label>Add-ons</label>
+                    <div id="editAddons" class="edit-addons"></div>
+                    <p class="edit-addons-hint">Per-child add-ons follow the number of children above. Prices already on a booking are kept, so editing never re-prices an old reservation.</p>
                 </div>
                 <div class="form-group full">
                     <label>Notes</label>

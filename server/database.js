@@ -62,6 +62,79 @@ db.exec(`
   );
 `);
 
+// --- Reservation add-ons ---
+// One row per add-on actually chosen, rather than one column per add-on that exists.
+// Adding an add-on to the catalogue therefore needs no schema change at all.
+//
+// unit_price is captured at booking time, so changing a price later never rewrites what
+// an existing booking was quoted — the same rule that protects estimated_total.
+//
+// The reservations table itself is never altered by this. Creating this table cannot
+// affect existing rows, and dropping it returns the database to its previous state.
+db.exec(`
+  CREATE TABLE IF NOT EXISTS reservation_addons (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    reservation_id INTEGER NOT NULL,
+    addon_id TEXT NOT NULL,
+    quantity INTEGER NOT NULL DEFAULT 1 CHECK(quantity > 0),
+    unit_price REAL NOT NULL,
+    line_total REAL NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE(reservation_id, addon_id),
+    FOREIGN KEY (reservation_id) REFERENCES reservations(id) ON DELETE CASCADE
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_reservation_addons_res ON reservation_addons(reservation_id);
+`);
+
+// One-time backfill of the three legacy add-on columns into the new table, so existing
+// bookings display their add-ons the same way new ones do.
+//
+// This only INSERTs into the new table. The legacy columns are left exactly as they are,
+// as a safety net and as the source of truth for what was originally booked. The guard
+// makes it idempotent: it runs once, and every restart after that is a no-op.
+function backfillLegacyAddons() {
+  const already = db.prepare('SELECT COUNT(*) AS c FROM reservation_addons').get().c;
+  if (already > 0) return;
+
+  const LEGACY = [
+    { column: 'addon_pizza', addonId: 'addon_pizza', unitPrice: 10 },
+    { column: 'addon_cake', addonId: 'addon_cake', unitPrice: 20 },
+    // Retired 28.08.2026. Historical bookings keep it at its original 8 EUR.
+    { column: 'addon_extra_child', addonId: 'addon_extra_child', unitPrice: 8 },
+  ];
+
+  const insert = db.prepare(`
+    INSERT OR IGNORE INTO reservation_addons (reservation_id, addon_id, quantity, unit_price, line_total)
+    VALUES (@reservation_id, @addon_id, @quantity, @unit_price, @line_total)
+  `);
+
+  const run = db.transaction(() => {
+    let copied = 0;
+    for (const legacy of LEGACY) {
+      const rows = db.prepare(
+        `SELECT id, ${legacy.column} AS qty FROM reservations WHERE ${legacy.column} > 0`
+      ).all();
+      for (const row of rows) {
+        insert.run({
+          reservation_id: row.id,
+          addon_id: legacy.addonId,
+          quantity: row.qty,
+          unit_price: legacy.unitPrice,
+          line_total: row.qty * legacy.unitPrice,
+        });
+        copied += 1;
+      }
+    }
+    return copied;
+  });
+
+  const copied = run();
+  if (copied > 0) console.log(`Add-on backfill: copied ${copied} legacy add-on line(s).`);
+}
+
+backfillLegacyAddons();
+
 // Partial unique index for double-booking prevention
 // Only one pending or confirmed reservation per date+slot+theme
 db.exec(`

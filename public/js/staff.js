@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'evening': '18:00-20:00'
       };
 
-      const themeNames = { 'forest': 'Enchanted Forest', 'royal': 'Royal Room' };
+      const themeNames = { 'forest': 'Enchanted Forest', 'royal': 'Throne Room' };
       const pkgNames = { 'lion': 'Lion (290\u20AC)', 'royal': 'Royal (440\u20AC)' };
 
       tbody.innerHTML = data.data.map(r => `
@@ -181,13 +181,13 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="detail-row"><span class="detail-label">Child</span><span class="detail-value">${esc(r.child_name)} (age ${r.child_age})</span></div>
         <div class="detail-row"><span class="detail-label">Date</span><span class="detail-value">${r.party_date}</span></div>
         <div class="detail-row"><span class="detail-label">Time Slot</span><span class="detail-value">${slotNames[r.time_slot] || r.time_slot}</span></div>
-        <div class="detail-row"><span class="detail-label">Theme</span><span class="detail-value">${r.theme === 'forest' ? 'Enchanted Forest' : 'Royal Room'}</span></div>
+        <div class="detail-row"><span class="detail-label">Theme</span><span class="detail-value">${r.theme === 'forest' ? 'Enchanted Forest' : 'Throne Room'}</span></div>
         <div class="detail-row"><span class="detail-label">Package</span><span class="detail-value">${r.package === 'lion' ? 'Lion (290\u20AC)' : 'Royal Party (440\u20AC)'}</span></div>
         <div class="detail-row"><span class="detail-label">Children</span><span class="detail-value">${r.num_children}</span></div>
         <div class="detail-row"><span class="detail-label">Adults</span><span class="detail-value">${r.num_adults}</span></div>
-        <div class="detail-row"><span class="detail-label">Extra Pizza</span><span class="detail-value">${r.addon_pizza} (${r.addon_pizza * 10}\u20AC)</span></div>
-        <div class="detail-row"><span class="detail-label">Extra Cake</span><span class="detail-value">${r.addon_cake} (${r.addon_cake * 20}\u20AC)</span></div>
-        ${r.addon_extra_child ? `<div class="detail-row"><span class="detail-label">Extra Children</span><span class="detail-value">${r.addon_extra_child} (${r.addon_extra_child * 8}\u20AC)</span></div>` : ''}
+        ${(r.addons || []).length
+          ? r.addons.map(a => `<div class="detail-row"><span class="detail-label">${esc(a.nameEn)}</span><span class="detail-value">${a.quantity} × ${a.unit_price}€ = ${a.line_total}€</span></div>`).join('')
+          : '<div class="detail-row"><span class="detail-label">Add-ons</span><span class="detail-value">None</span></div>'}
         <div class="detail-row"><span class="detail-label">Estimated Total</span><span class="detail-value"><strong>${r.estimated_total}\u20AC</strong></span></div>
         ${r.notes ? `<div class="detail-row"><span class="detail-label">Notes</span><span class="detail-value">${esc(r.notes)}</span></div>` : ''}
         ${r.rejection_reason ? `<div class="detail-row"><span class="detail-label">Rejection Reason</span><span class="detail-value">${esc(r.rejection_reason)}</span></div>` : ''}

@@ -36,7 +36,7 @@ const SLOT_NAMES = {
   'evening': '18:00 - 20:00'
 };
 
-const THEME_NAMES = { 'forest': 'Zacarana Suma / Enchanted Forest', 'royal': 'Kraljevska Soba / Royal Room' };
+const THEME_NAMES = { 'forest': 'Zacarana Suma / Enchanted Forest', 'royal': 'Kraljevska Soba / Throne Room' };
 const PKG_NAMES = { 'lion': 'Lion Paket (290\u20AC)', 'royal': 'Royal Party Paket (440\u20AC)' };
 
 // --- Send notification to owner when new reservation arrives ---
@@ -68,9 +68,7 @@ async function notifyOwner(reservation) {
               <tr><td colspan="2" style="border-top:1px solid #e0e0e0;padding:4px 0;"></td></tr>
               <tr><td style="padding:8px 0;font-weight:bold;color:#555;">Djeca:</td><td style="padding:8px 0;">${esc(r.num_children)}</td></tr>
               <tr><td style="padding:8px 0;font-weight:bold;color:#555;">Odrasli:</td><td style="padding:8px 0;">${esc(r.num_adults)}</td></tr>
-              ${r.addon_pizza ? `<tr><td style="padding:8px 0;font-weight:bold;color:#555;">Dodatna pizza:</td><td style="padding:8px 0;">${esc(r.addon_pizza)}x (${r.addon_pizza * 10}\u20AC)</td></tr>` : ''}
-              ${r.addon_cake ? `<tr><td style="padding:8px 0;font-weight:bold;color:#555;">Dodatna torta:</td><td style="padding:8px 0;">${esc(r.addon_cake)}x (${r.addon_cake * 20}\u20AC)</td></tr>` : ''}
-              ${r.addon_extra_child ? `<tr><td style="padding:8px 0;font-weight:bold;color:#555;">Dodatna djeca:</td><td style="padding:8px 0;">${esc(r.addon_extra_child)}x (${r.addon_extra_child * 8}\u20AC)</td></tr>` : ''}
+              ${(r.addons || []).map(a => `<tr><td style="padding:8px 0;font-weight:bold;color:#555;">${esc(a.nameHr)}:</td><td style="padding:8px 0;">${esc(a.quantity)}x (${esc(a.line_total)}€)</td></tr>`).join('')}
               <tr><td colspan="2" style="border-top:1px solid #e0e0e0;padding:4px 0;"></td></tr>
               <tr><td style="padding:8px 0;font-weight:bold;color:#555;">Procijenjeni iznos:</td><td style="padding:8px 0;font-size:18px;font-weight:bold;color:#27AE60;">${esc(r.estimated_total)}\u20AC</td></tr>
               ${r.notes ? `<tr><td style="padding:8px 0;font-weight:bold;color:#555;">Napomene:</td><td style="padding:8px 0;">${esc(r.notes)}</td></tr>` : ''}

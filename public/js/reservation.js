@@ -218,11 +218,15 @@ document.addEventListener('DOMContentLoaded', () => {
       num_children: form.num_children.value,
       num_adults: form.num_adults.value || '0',
       package: form.package?.value,
-      addon_pizza: getQtyValue(0),
-      addon_cake: getQtyValue(1),
       addon_extra_child: 0,
+      addons: collectAddons(),
       notes: form.notes.value
     };
+
+    // The two legacy fields mirror their catalogue lines so older server code and the
+    // dashboards keep agreeing with the add-on table.
+    data.addon_pizza = (data.addons.find(a => a.id === 'addon_pizza') || {}).quantity || 0;
+    data.addon_cake = (data.addons.find(a => a.id === 'addon_cake') || {}).quantity || 0;
 
     // Client-side validation
 
@@ -316,10 +320,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  function getQtyValue(index) {
-    const qtyValues = form.querySelectorAll('.qty-value');
-    return qtyValues[index] ? parseInt(qtyValues[index].textContent) || 0 : 0;
+  // Reads every add-on the customer selected, keyed by its catalogue id rather than its
+  // position on the page, so reordering or adding an add-on cannot shift the mapping.
+  function collectAddons() {
+    const chosen = [];
+
+    form.querySelectorAll('.addon-item[data-addon-id]').forEach((item) => {
+      const id = item.getAttribute('data-addon-id');
+      const mode = item.getAttribute('data-pricing-mode') || 'unit';
+
+      if (mode === 'unit') {
+        const display = item.querySelector('.qty-value');
+        const quantity = display ? parseInt(display.textContent, 10) || 0 : 0;
+        if (quantity > 0) chosen.push({ id, quantity });
+      } else {
+        // flat and per_child are on/off; the server decides the quantity.
+        const check = item.querySelector('.addon-check');
+        if (check && check.checked) {
+          chosen.push({ id, quantity: 1 });
+        }
+      }
+    });
+
+    return chosen;
   }
+
 
   function showMessage(text, type) {
     if (!formMessage) return;

@@ -31,6 +31,8 @@ function sanitizeEmail(str) {
 }
 
 // --- PUBLIC: Submit reservation (with transaction for race condition safety) ---
+const { normalizeAddons, reviseAddons, saveAddons, replaceAddons, getAddons, ADDONS } = require('../addons');
+
 const insertReservationTx = db.transaction((data) => {
   // Check availability inside the transaction — eliminates race condition
   const existing = stmts.getBookedSlots.all(data.party_date);
@@ -50,8 +52,29 @@ const insertReservationTx = db.transaction((data) => {
     return { conflict: true };
   }
 
-  const result = stmts.insertReservation.run(data);
-  return { conflict: false, id: result.lastInsertRowid };
+  const { addonLines, ...reservation } = data;
+  const result = stmts.insertReservation.run(reservation);
+  const id = result.lastInsertRowid;
+
+  // Same transaction as the reservation: a booking is never saved with half its add-ons.
+  if (addonLines && addonLines.length) saveAddons(id, addonLines);
+
+  return { conflict: false, id };
+});
+
+// Public: the add-ons available for booking. The form renders from this, so the form,
+// the totals and the published price list all come from one catalogue.
+router.get('/addons', (req, res) => {
+  res.json({
+    success: true,
+    data: ADDONS.map((a) => ({
+      id: a.id,
+      nameHr: a.nameHr,
+      nameEn: a.nameEn,
+      price: a.price,
+      pricingMode: a.pricingMode,
+    })),
+  });
 });
 
 router.post('/', reservationLimiter, (req, res) => {
@@ -61,6 +84,7 @@ router.post('/', reservationLimiter, (req, res) => {
       child_name, child_age, party_date, theme, time_slot,
       num_children, num_adults, package: pkg,
       addon_pizza, addon_cake, addon_extra_child,
+      addons,
       notes
     } = req.body;
 
@@ -125,11 +149,27 @@ router.post('/', reservationLimiter, (req, res) => {
     const childCount = Math.min(maxChildren, Math.max(1, parseInt(num_children) || 1));
     const adultCount = Math.min(50, Math.max(0, parseInt(num_adults) || 0));
 
-    const estimated_total = calculateTotal(pkg, pizzaQty, cakeQty, extraChildQty);
+    // Add-ons chosen from the catalogue. Prices come from the catalogue, never the client.
+    // Anything unbookable is dropped rather than failing the whole reservation.
+    const { lines: addonLines, total: addonsTotal } = normalizeAddons(addons, {
+      numChildren: childCount,
+    });
+
+    // The legacy pizza/cake columns mirror their catalogue lines, so anything still
+    // reading those columns keeps telling the truth.
+    const pizzaLine = addonLines.find((l) => l.addon_id === 'addon_pizza');
+    const cakeLine = addonLines.find((l) => l.addon_id === 'addon_cake');
+    const legacyPizza = pizzaLine ? pizzaLine.quantity : pizzaQty;
+    const legacyCake = cakeLine ? cakeLine.quantity : cakeQty;
+
+    // Package plus every add-on line. Adding an add-on to the catalogue needs no change
+    // here, because its price arrives through addonsTotal.
+    const estimated_total = Number((calculateTotal(pkg, 0, 0, 0) + addonsTotal).toFixed(2));
 
     // Insert inside a transaction to prevent race condition
     try {
       const result = insertReservationTx({
+        addonLines,
         parent_name: cleanName,
         parent_phone: cleanPhone,
         parent_email: cleanEmail,
@@ -141,8 +181,8 @@ router.post('/', reservationLimiter, (req, res) => {
         num_children: childCount,
         num_adults: adultCount,
         package: pkg,
-        addon_pizza: pizzaQty,
-        addon_cake: cakeQty,
+        addon_pizza: legacyPizza,
+        addon_cake: legacyCake,
         addon_extra_child: extraChildQty,
         estimated_total,
         notes: notes ? sanitizeString(notes, 1000) : null
@@ -162,7 +202,8 @@ router.post('/', reservationLimiter, (req, res) => {
       });
 
       // Send emails in background (don't block the response)
-      const savedReservation = stmts.getReservationById.get(result.id);
+      const saved = stmts.getReservationById.get(result.id);
+      const savedReservation = saved ? { ...saved, addons: getAddons(result.id) } : null;
       if (savedReservation) {
         notifyOwner(savedReservation).catch(() => {});
         notifyCustomer(savedReservation).catch(() => {});
@@ -231,7 +272,10 @@ router.get('/', requireAuth, requireStaff, (req, res) => {
       );
     }
 
-    res.json({ success: true, data: reservations });
+    res.json({
+      success: true,
+      data: reservations.map((r) => ({ ...r, addons: getAddons(r.id) })),
+    });
   } catch (err) {
     console.error('List reservations error:', err);
     res.status(500).json({ error: 'Internal server error.' });
@@ -247,7 +291,7 @@ router.get('/:id', requireAuth, requireStaff, (req, res) => {
     const reservation = stmts.getReservationById.get(id);
     if (!reservation) return res.status(404).json({ error: 'Reservation not found.' });
 
-    res.json({ success: true, data: reservation });
+    res.json({ success: true, data: { ...reservation, addons: getAddons(id) } });
   } catch (err) {
     console.error('Get reservation error:', err);
     res.status(500).json({ error: 'Internal server error.' });
@@ -304,7 +348,13 @@ const updateReservationTx = db.transaction((id, data) => {
   }
   if (isBooked) return { conflict: true };
 
-  stmts.updateReservation.run({ ...data, id });
+  const { addonLines, ...reservation } = data;
+  stmts.updateReservation.run({ ...reservation, id });
+
+  // Same transaction as the reservation, exactly as on insert: an edit never half-applies,
+  // so a booking can't end up updated with its old add-on lines (or with none at all).
+  replaceAddons(id, addonLines || []);
+
   return { conflict: false };
 });
 
@@ -320,6 +370,7 @@ router.put('/:id', requireAuth, requireRole('admin'), (req, res) => {
       parent_name, parent_phone, parent_email,
       child_name, child_age, party_date, theme, time_slot,
       num_children, num_adults, package: pkg,
+      addons,
       addon_pizza, addon_cake, addon_extra_child,
       notes, notify_customer
     } = req.body;
@@ -347,22 +398,60 @@ router.put('/:id', requireAuth, requireRole('admin'), (req, res) => {
     // Admin can edit reservations with past dates (no future-only restriction).
 
     const maxChildren = pkg === 'royal' ? 50 : 25;
-    const totalChildren = (parseInt(num_children) || 0) + (parseInt(addon_extra_child) || 0);
-    if (totalChildren > maxChildren) {
-      errors.push(`Total children (${totalChildren}) exceeds maximum of ${maxChildren} for ${pkg === 'royal' ? 'Royal Party' : 'Lion'} package.`);
-    }
 
     if (errors.length > 0) return res.status(400).json({ error: errors.join(' ') });
 
-    const pizzaQty = Math.min(20, Math.max(0, parseInt(addon_pizza) || 0));
-    const cakeQty = Math.min(10, Math.max(0, parseInt(addon_cake) || 0));
-    const extraChildQty = Math.min(30, Math.max(0, parseInt(addon_extra_child) || 0));
     const childCount = Math.min(maxChildren, Math.max(1, parseInt(num_children) || 1));
     const adultCount = Math.min(50, Math.max(0, parseInt(num_adults) || 0));
 
-    const estimated_total = calculateTotal(pkg, pizzaQty, cakeQty, extraChildQty);
+    const existingAddons = getAddons(id);
+
+    // The admin form sends the booking's full add-on list. An older cached page sends only
+    // the three legacy quantities -- fall back to those and leave every other add-on line
+    // on the booking exactly as booked.
+    let addonLines;
+    if (Array.isArray(addons)) {
+      addonLines = reviseAddons(existingAddons, addons, { numChildren: childCount }).lines;
+    } else {
+      const LEGACY_PRICES = { addon_pizza: 10, addon_cake: 20, addon_extra_child: 8 };
+      const legacyQty = {
+        addon_pizza: Math.min(20, Math.max(0, parseInt(addon_pizza) || 0)),
+        addon_cake: Math.min(10, Math.max(0, parseInt(addon_cake) || 0)),
+        addon_extra_child: Math.min(30, Math.max(0, parseInt(addon_extra_child) || 0)),
+      };
+      addonLines = [
+        ...existingAddons
+          .filter((a) => !(a.addon_id in legacyQty))
+          .map((a) => ({ addon_id: a.addon_id, quantity: a.quantity, unit_price: a.unit_price, line_total: a.line_total })),
+        ...Object.entries(legacyQty)
+          .filter(([, qty]) => qty > 0)
+          .map(([addonId, qty]) => {
+            const previous = existingAddons.find((a) => a.addon_id === addonId);
+            const unitPrice = previous ? previous.unit_price : LEGACY_PRICES[addonId];
+            return { addon_id: addonId, quantity: qty, unit_price: unitPrice, line_total: Number((qty * unitPrice).toFixed(2)) };
+          }),
+      ];
+    }
+
+    // Keep the legacy columns mirroring the add-on lines so older readers stay correct.
+    const qtyOf = (addonId) => (addonLines.find((a) => a.addon_id === addonId) || {}).quantity || 0;
+    const pizzaQty = qtyOf('addon_pizza');
+    const cakeQty = qtyOf('addon_cake');
+    const extraChildQty = qtyOf('addon_extra_child');
+
+    // Extra children are retired, but the old bookings that carry them still fill the room.
+    const totalChildren = childCount + extraChildQty;
+    if (totalChildren > maxChildren) {
+      return res.status(400).json({
+        error: `Total children (${totalChildren}) exceeds maximum of ${maxChildren} for ${pkg === 'royal' ? 'Royal Party' : 'Lion'} package.`
+      });
+    }
+
+    const addonsTotal = addonLines.reduce((sum, a) => sum + a.line_total, 0);
+    const estimated_total = Number((calculateTotal(pkg, 0, 0, 0) + addonsTotal).toFixed(2));
 
     const result = updateReservationTx(id, {
+      addonLines,
       parent_name: cleanName,
       parent_phone: cleanPhone,
       parent_email: cleanEmail,
@@ -385,7 +474,7 @@ router.put('/:id', requireAuth, requireRole('admin'), (req, res) => {
       return res.status(409).json({ error: 'This time slot is already booked. Please choose a different time or date.' });
     }
 
-    const updated = stmts.getReservationById.get(id);
+    const updated = { ...stmts.getReservationById.get(id), addons: getAddons(id) };
     res.json({ success: true, data: updated });
 
     // Optional: notify customer that reservation was updated (re-send confirmation email)

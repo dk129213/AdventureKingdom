@@ -294,7 +294,7 @@
                         <span data-en>Add-ons</span>
                     </div>
                     <div class="addon-items">
-                        <div class="addon-item">
+                        <div class="addon-item" data-addon-id="addon_pizza" data-pricing-mode="unit">
                             <span class="addon-icon">&#x1F355;</span>
                             <div class="addon-info">
                                 <div class="addon-name" data-hr>Dodatna pizza</div>
@@ -308,7 +308,7 @@
                                 <button type="button" class="qty-plus">+</button>
                             </div>
                         </div>
-                        <div class="addon-item">
+                        <div class="addon-item" data-addon-id="addon_cake" data-pricing-mode="unit">
                             <span class="addon-icon">&#x1F370;</span>
                             <div class="addon-info">
                                 <div class="addon-name" data-hr>Dodatna Ledo torta</div>
@@ -321,6 +321,96 @@
                                 <span class="qty-value">0</span>
                                 <button type="button" class="qty-plus">+</button>
                             </div>
+                        </div>
+                        <div class="addon-item" data-addon-id="addon_mascot" data-pricing-mode="flat">
+                            <span class="addon-icon">&#x1F3AD;</span>
+                            <div class="addon-info">
+                                <div class="addon-name" data-hr>Maskota</div>
+                                <div class="addon-name" data-en>Mascot</div>
+                                <div class="addon-price" data-hr>20&euro; po proslavi</div>
+                                <div class="addon-price" data-en>20&euro; per party</div>
+                            </div>
+                            <label class="addon-toggle">
+                                <input type="checkbox" class="addon-check">
+                                <span class="addon-toggle-box" aria-hidden="true"></span>
+                                <span class="sr-only" data-hr>Dodaj</span><span class="sr-only" data-en>Add</span>
+                            </label>
+                        </div>
+                        <div class="addon-item" data-addon-id="addon_pinata" data-pricing-mode="flat">
+                            <span class="addon-icon">&#x1FA85;</span>
+                            <div class="addon-info">
+                                <div class="addon-name" data-hr>Pinjata u obliku maskote</div>
+                                <div class="addon-name" data-en>Mascot-shaped pi&ntilde;ata</div>
+                                <div class="addon-price" data-hr>20&euro; po proslavi</div>
+                                <div class="addon-price" data-en>20&euro; per party</div>
+                            </div>
+                            <label class="addon-toggle">
+                                <input type="checkbox" class="addon-check">
+                                <span class="addon-toggle-box" aria-hidden="true"></span>
+                                <span class="sr-only" data-hr>Dodaj</span><span class="sr-only" data-en>Add</span>
+                            </label>
+                        </div>
+                        <div class="addon-item" data-addon-id="addon_extra_hour" data-pricing-mode="flat">
+                            <span class="addon-icon">&#x23F0;</span>
+                            <div class="addon-info">
+                                <div class="addon-name" data-hr>Dodatni sat igre u igraonici</div>
+                                <div class="addon-name" data-en>Extra hour of play in the playground</div>
+                                <div class="addon-price" data-hr>100&euro; po proslavi</div>
+                                <div class="addon-price" data-en>100&euro; per party</div>
+                                <div class="addon-note" data-hr>Nakon rođendanske sobe djeca se igraju još jedan sat u igraonici.</div>
+                                <div class="addon-note" data-en>After the birthday room, the children play for another hour in the playground.</div>
+                            </div>
+                            <label class="addon-toggle">
+                                <input type="checkbox" class="addon-check">
+                                <span class="addon-toggle-box" aria-hidden="true"></span>
+                                <span class="sr-only" data-hr>Dodaj</span><span class="sr-only" data-en>Add</span>
+                            </label>
+                        </div>
+                        <div class="addon-item" data-addon-id="addon_cotton_candy" data-pricing-mode="per_child">
+                            <span class="addon-icon">&#x1F36D;</span>
+                            <div class="addon-info">
+                                <div class="addon-name" data-hr>Šećerna vata i dječji šampanjac</div>
+                                <div class="addon-name" data-en>Cotton candy and kids' champagne</div>
+                                <div class="addon-price" data-hr>2&euro; po djetetu</div>
+                                <div class="addon-price" data-en>2&euro; per child</div>
+                                <div class="addon-note" data-hr>Naplaćuje se po djetetu prema broju djece.</div>
+                                <div class="addon-note" data-en>Charged per child, based on the number of children.</div>
+                            </div>
+                            <label class="addon-toggle">
+                                <input type="checkbox" class="addon-check">
+                                <span class="addon-toggle-box" aria-hidden="true"></span>
+                                <span class="sr-only" data-hr>Dodaj</span><span class="sr-only" data-en>Add</span>
+                            </label>
+                        </div>
+                        <div class="addon-item" data-addon-id="addon_canvas" data-pricing-mode="per_child">
+                            <span class="addon-icon">&#x1F3A8;</span>
+                            <div class="addon-info">
+                                <div class="addon-name" data-hr>Slikanje na platnu</div>
+                                <div class="addon-name" data-en>Canvas painting</div>
+                                <div class="addon-price" data-hr>5&euro; po djetetu</div>
+                                <div class="addon-price" data-en>5&euro; per child</div>
+                                <div class="addon-note" data-hr>Naplaćuje se po djetetu prema broju djece.</div>
+                                <div class="addon-note" data-en>Charged per child, based on the number of children.</div>
+                            </div>
+                            <label class="addon-toggle">
+                                <input type="checkbox" class="addon-check">
+                                <span class="addon-toggle-box" aria-hidden="true"></span>
+                                <span class="sr-only" data-hr>Dodaj</span><span class="sr-only" data-en>Add</span>
+                            </label>
+                        </div>
+                        <div class="addon-item" data-addon-id="addon_braids" data-pricing-mode="flat">
+                            <span class="addon-icon">&#x1F380;</span>
+                            <div class="addon-info">
+                                <div class="addon-name" data-hr>Pletenice s mašnom</div>
+                                <div class="addon-name" data-en>Braids with a bow</div>
+                                <div class="addon-price" data-hr>20&euro; po proslavi</div>
+                                <div class="addon-price" data-en>20&euro; per party</div>
+                            </div>
+                            <label class="addon-toggle">
+                                <input type="checkbox" class="addon-check">
+                                <span class="addon-toggle-box" aria-hidden="true"></span>
+                                <span class="sr-only" data-hr>Dodaj</span><span class="sr-only" data-en>Add</span>
+                            </label>
                         </div>
                     </div>
                 </div>
