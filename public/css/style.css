@@ -150,6 +150,27 @@ img { max-width: 100%; display: block; }
     background: rgba(255, 215, 0, 0.1);
 }
 
+/* --- Arcade link in the main nav ---
+   The arcade is a different world from the rest of the site, so its menu entry borrows the
+   AK Arcade palette (neon on near-black) to set it apart at a glance, while staying quieter
+   than the gold booking button next to it. */
+.nav-links a.nav-arcade {
+    background: linear-gradient(135deg, #2a1150, #140a26);
+    border: 1px solid rgba(45, 226, 230, 0.55);
+    color: #2de2e6;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-shadow: 0 0 8px rgba(45, 226, 230, 0.45);
+}
+
+.nav-links a.nav-arcade:hover {
+    background: linear-gradient(135deg, #3a1566, #1b0d31);
+    border-color: rgba(255, 62, 165, 0.75);
+    color: #ff3ea5;
+    text-shadow: 0 0 10px rgba(255, 62, 165, 0.6);
+    box-shadow: 0 0 14px rgba(255, 62, 165, 0.35);
+}
+
 .nav-cta {
     background: linear-gradient(135deg, var(--gold), var(--gold-dark)) !important;
     color: var(--bg-dark) !important;
