@@ -105,16 +105,24 @@ function sendPage(res, fileName) {
     if (err) return res.status(404).send('Not found');
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.send(stampAssets(html));
+    // The arcade refers to its scripts relatively, so stamping needs the page's folder.
+    res.send(stampAssets(html, path.posix.dirname(fileName)));
   });
 }
 
 app.use((req, res, next) => {
   if (req.method !== 'GET' && req.method !== 'HEAD') return next();
-  const name = req.path === '/' ? 'index.html' : req.path.slice(1);
-  // Top-level .html pages only; anything else falls through to express.static.
-  if (!name.endsWith('.html') || name.includes('/') || name.includes('..')) return next();
-  if (!fs.existsSync(path.join(__dirname, '..', 'public', name))) return next();
+  let name = req.path === '/' ? 'index.html' : req.path.slice(1);
+  // A folder URL such as /arcade/ means that folder's index.html.
+  if (name.endsWith('/')) name += 'index.html';
+  if (!name.endsWith('.html') || name.includes('..')) return next();
+
+  // Resolve and confirm the file really sits inside public/ before reading it.
+  const publicDir = path.join(__dirname, '..', 'public');
+  const filePath = path.resolve(publicDir, name);
+  if (!filePath.startsWith(publicDir + path.sep)) return next();
+  if (!fs.existsSync(filePath)) return next();
+
   return sendPage(res, name);
 });
 
