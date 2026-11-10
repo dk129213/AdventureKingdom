@@ -1,0 +1,13 @@
+Third-party software bundled with AKarcade
+
+three.js 0.160.0 (bundled into ../room.bundle.js)
+  Copyright © 2010-2023 three.js authors. MIT License.
+  https://github.com/mrdoob/three.js/blob/r160/LICENSE
+
+JSNES 2.1.0 (jsnes.min.js)
+  Copyright © Ben Firshman and contributors. Apache License 2.0.
+  https://github.com/bfirsh/jsnes/blob/master/LICENSE
+
+Concentration Room (../games/croom.nes), distributed unmodified
+  Copyright © Damian Yerrick. GNU General Public License v3 or later.
+  Source code: https://github.com/pinobatch/croom-nes

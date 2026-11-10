@@ -51,9 +51,82 @@
             <button class="dash-tab active" data-tab="reservations">&#x1F4CB; Reservations</button>
             <button class="dash-tab" data-tab="events">&#x1F3AA; Events</button>
             <button class="dash-tab" data-tab="gallery">&#x1F4F8; Gallery</button>
+            <button class="dash-tab" data-tab="arcade">&#x1F579;&#xFE0F; Arcade</button>
         </div>
 
         <div class="dash-content">
+
+            <!-- ARCADE TAB -->
+            <div class="tab-panel" id="tab-arcade">
+                <div class="event-form">
+                    <h3>&#x1F3C6; Tournament Day</h3>
+
+                    <div id="arcadeActive" style="display:none;">
+                        <p style="font-size:1.1rem;margin:0 0 8px;"><strong id="arcadeActiveTitle"></strong> is running.</p>
+                        <p style="margin:0 0 16px;color:#555;">Ends <strong id="arcadeActiveEnds"></strong> &middot; time left <strong id="arcadeActiveLeft"></strong></p>
+                        <button class="action-btn reject" id="arcadeStopBtn" style="padding:10px 18px;">Stop tournament now</button>
+                    </div>
+
+                    <div id="arcadeStartForm">
+                        <p style="margin:0 0 16px;color:#555;">Starting tournament day switches the whole arcade to its gold tournament look. Players join with their e-mail, and the highest score on the chosen game wins.</p>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Game</label>
+                                <select id="arcadeGame" style="padding:10px;border:2px solid #E5E7EB;border-radius:8px;"></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Title (optional)</label>
+                                <input type="text" id="arcadeTitle" maxlength="60" placeholder="Tournament Day">
+                            </div>
+                            <div class="form-group">
+                                <label>Ends at</label>
+                                <input type="datetime-local" id="arcadeEnds">
+                            </div>
+                            <div class="form-group" style="justify-content:flex-end;">
+                                <button class="save-btn" id="arcadeStartBtn">Start tournament day</button>
+                            </div>
+                        </div>
+                    </div>
+                    <p id="arcadeMsg" style="margin:14px 0 0;font-weight:700;min-height:1.2em;"></p>
+                </div>
+
+                <div class="event-form">
+                    <h3>Tournament standings</h3>
+                    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px;">
+                        <select id="arcadeHistory" style="padding:10px;border:2px solid #E5E7EB;border-radius:8px;max-width:100%;"></select>
+                        <button class="filter-btn" id="arcadeExportBtn">Download results (CSV)</button>
+                        <button class="filter-btn" id="arcadeRefreshBtn" style="background:#6B7280;">Refresh</button>
+                    </div>
+                    <div class="res-table-wrap">
+                        <table class="res-table">
+                            <thead>
+                                <tr><th>Rank</th><th>Player</th><th>E-mail</th><th>Phone</th><th>Best score</th><th>Games</th><th>Joined</th><th>Actions</th></tr>
+                            </thead>
+                            <tbody id="arcadeStandingsBody">
+                                <tr><td colspan="8" style="text-align:center;padding:30px;color:#999;">Open this tab to load.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p style="margin:12px 0 0;color:#777;font-size:0.9rem;">E-mail addresses and phone numbers are deleted automatically 30 days after a tournament ends.</p>
+                </div>
+
+                <div class="event-form">
+                    <h3>All-time high scores</h3>
+                    <div style="margin-bottom:14px;">
+                        <select id="arcadeBoardGame" style="padding:10px;border:2px solid #E5E7EB;border-radius:8px;"></select>
+                    </div>
+                    <div class="res-table-wrap">
+                        <table class="res-table">
+                            <thead>
+                                <tr><th>Rank</th><th>Initials</th><th>Score</th><th>E-mail (if they joined a tournament)</th><th>Date</th><th>Actions</th></tr>
+                            </thead>
+                            <tbody id="arcadeBoardBody">
+                                <tr><td colspan="6" style="text-align:center;padding:30px;color:#999;">Open this tab to load.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
             <!-- RESERVATIONS TAB -->
             <div class="tab-panel active" id="tab-reservations">
                 <div class="stats-grid" id="statsGrid">
@@ -299,5 +372,6 @@
 
     <script src="js/auth.js"></script>
     <script src="js/admin.js"></script>
+    <script src="js/adminArcade.js"></script>
 </body>
 </html>

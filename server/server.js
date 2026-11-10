@@ -74,8 +74,12 @@ app.use(compression());
 
 // --- Request protections ---
 app.use(cors({ origin: false })); // same-origin only
-app.use(globalLimiter);
-app.use(slowDown);
+// The arcade (its static files and its API) is exempt from the site-wide limits: on tournament
+// day a whole room of players shares one Wi-Fi address, and their traffic must not lock the
+// booking site out for everyone else there. The arcade API has its own limits (routes/arcade.js).
+const isArcadeRequest = (req) => req.path.startsWith('/arcade/') || req.path.startsWith('/api/arcade/');
+app.use((req, res, next) => (isArcadeRequest(req) ? next() : globalLimiter(req, res, next)));
+app.use((req, res, next) => (isArcadeRequest(req) ? next() : slowDown(req, res, next)));
 
 // Strict body size limits to prevent server overload
 app.use(express.json({ limit: '5kb' }));
@@ -164,6 +168,11 @@ app.use('/api/gallery', galleryRoutes);
 // Apply CSRF to public reservation POST only
 app.post('/api/reservations', csrfProtection);
 app.use('/api/reservations', reservationRoutes);
+
+// AK Arcade: high scores and tournament day. The join form carries personal data, so it
+// gets the same CSRF check as a reservation.
+app.post('/api/arcade/join', csrfProtection);
+app.use('/api/arcade', require('./routes/arcade'));
 
 // --- Page routes (serve HTML for dashboard pages) ---
 app.get('/staff', (req, res) => sendPage(res, 'staff.html'));

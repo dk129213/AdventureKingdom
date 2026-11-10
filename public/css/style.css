@@ -2104,3 +2104,85 @@ img { max-width: 100%; display: block; }
     white-space: nowrap;
     border: 0;
 }
+
+/* ========== ARCADE PROMO ========== */
+.arcade-promo {
+    padding: 80px 0;
+    background:
+        radial-gradient(60% 80% at 20% 40%, rgba(255, 62, 165, 0.22), transparent 70%),
+        radial-gradient(50% 70% at 85% 60%, rgba(45, 226, 230, 0.16), transparent 70%),
+        #07030f;
+    color: var(--text-light);
+    border-top: 3px solid #ff3ea5;
+    border-bottom: 3px solid #2de2e6;
+    overflow: hidden;
+}
+.arcade-promo-inner {
+    display: grid;
+    grid-template-columns: minmax(200px, 340px) 1fr;
+    gap: 48px;
+    align-items: center;
+}
+.arcade-promo-logo { display: block; }
+.arcade-promo-logo img {
+    display: block;
+    width: 100%;
+    height: auto;
+    mix-blend-mode: screen;
+    transition: transform 0.3s ease;
+}
+.arcade-promo-logo:hover img { transform: scale(1.04) rotate(-1deg); }
+.arcade-promo-eyebrow {
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    letter-spacing: 3px;
+    color: #2de2e6;
+    margin-bottom: 10px;
+}
+.arcade-promo-title {
+    font-family: var(--font-heading);
+    font-size: clamp(1.9rem, 4vw, 2.8rem);
+    line-height: 1.15;
+    color: var(--gold);
+    text-shadow: 0 0 24px rgba(255, 62, 165, 0.55);
+    margin-bottom: 16px;
+}
+.arcade-promo-text {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.86);
+    max-width: 56ch;
+    margin-bottom: 20px;
+}
+.arcade-promo-games {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 0;
+    margin: 0 0 28px;
+}
+.arcade-promo-games li {
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(45, 226, 230, 0.6);
+    color: #2de2e6;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+.arcade-promo-btn {
+    background: linear-gradient(135deg, #ff3ea5, #6c2bd9);
+    color: #fff;
+    box-shadow: 0 4px 24px rgba(255, 62, 165, 0.45);
+}
+.arcade-promo-btn:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 10px 36px rgba(255, 62, 165, 0.65);
+}
+@media (max-width: 768px) {
+    .arcade-promo { padding: 56px 0; }
+    .arcade-promo-inner { grid-template-columns: 1fr; gap: 20px; text-align: center; }
+    .arcade-promo-logo { max-width: 240px; margin: 0 auto; }
+    .arcade-promo-text { margin-left: auto; margin-right: auto; }
+    .arcade-promo-games { justify-content: center; }
+}
