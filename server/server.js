@@ -78,8 +78,13 @@ app.use(cors({ origin: false })); // same-origin only
 // day a whole room of players shares one Wi-Fi address, and their traffic must not lock the
 // booking site out for everyone else there. The arcade API has its own limits (routes/arcade.js).
 const isArcadeRequest = (req) => req.path.startsWith('/arcade/') || req.path.startsWith('/api/arcade/');
-app.use((req, res, next) => (isArcadeRequest(req) ? next() : globalLimiter(req, res, next)));
-app.use((req, res, next) => (isArcadeRequest(req) ? next() : slowDown(req, res, next)));
+// The published price list is exempt too: point VII of the Odluka (NN 101/2026) requires
+// that automated tools be able to collect prices in real time, which the limiters block.
+// Everything under /cjenik is public, read-only price data.
+const isPriceListRequest = (req) => req.path === '/cjenik' || req.path.startsWith('/cjenik/');
+const isExempt = (req) => isArcadeRequest(req) || isPriceListRequest(req);
+app.use((req, res, next) => (isExempt(req) ? next() : globalLimiter(req, res, next)));
+app.use((req, res, next) => (isExempt(req) ? next() : slowDown(req, res, next)));
 
 // Strict body size limits to prevent server overload
 app.use(express.json({ limit: '5kb' }));
@@ -185,6 +190,9 @@ app.use('/api/arcade', require('./routes/arcade'));
 // --- Page routes (serve HTML for dashboard pages) ---
 app.get('/staff', (req, res) => sendPage(res, 'staff.html'));
 app.get('/admin', (req, res) => sendPage(res, 'admin.html'));
+// Cjenik: the machine-readable price list and its human-readable page (NN 101/2026).
+app.use('/cjenik', require('./routes/cjenik'));
+
 app.get('/privacy', (req, res) => sendPage(res, 'privacy.html'));
 app.get('/terms', (req, res) => sendPage(res, 'terms.html'));
 

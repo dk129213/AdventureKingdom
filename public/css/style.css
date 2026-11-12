@@ -1206,6 +1206,12 @@ img { max-width: 100%; display: block; }
 
 .footer-bottom p { color: rgba(255,255,255,0.4); font-size: 0.85rem; }
 
+/* Legal links in the booking page footer, including the machine-readable price list the
+   Odluka (NN 101/2026) requires to be publicly linked. */
+.footer-legal { margin-top: 10px; }
+.footer-legal a { color: rgba(255,255,255,0.65); font-size: 0.85rem; transition: var(--transition); }
+.footer-legal a:hover { color: var(--gold); }
+
 /* --- FLOATING BUTTON --- */
 .floating-btn {
     position: fixed;
@@ -1625,6 +1631,22 @@ img { max-width: 100%; display: block; }
 .addon-info { flex: 1; }
 .addon-info .addon-name { font-weight: 600; color: var(--text-dark); }
 .addon-info .addon-price { font-size: 0.85rem; color: var(--blue-dark); font-weight: 700; }
+
+/* --- Sidrena cijena / anchor price ---
+   Odluka o isticanju dodatne cijene (NN 101/2026, izmjena NN 110/2026) requires the price
+   that applied on 10.9.2026 to appear next to the retail price wherever it is advertised,
+   websites included. Kept deliberately quiet so it informs without competing with the
+   price the customer is actually paying. */
+.price-anchor {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    line-height: 1.35;
+    margin-top: 2px;
+}
+
+.option-label .price-anchor { text-align: center; }
+.service-info .price-anchor { margin: 4px 0 0; }
 
 .addon-qty {
     display: flex;

@@ -3,6 +3,8 @@ Allow: /
 Allow: /rezervacija.html
 Allow: /privacy
 Allow: /terms
+Allow: /cjenik
+Allow: /cjenik/
 
 # Block admin/staff pages from search engines
 Disallow: /admin
