@@ -25,8 +25,16 @@
 // "( 2. dijete)".
 
 // Identifies the outlet in the published file name (point VI).
+//
+// `oblik` is the outlet-type token. The collection systems recognise a fixed set of
+// categories -- supermarket, hipermarket, diskont, cash&carry -- and everything else,
+// including service activities, falls under "ostalo". Adventure Kingdom's registered
+// activity is NKD 93.21.0 (zabavni i tematski parkovi / igraonica), so it is a service
+// provider, not a goods trader. A descriptive token like "usluzni-objekt" reads well to a
+// human but risks being rejected as an unknown category by an automated reader, so the
+// official "ostalo" is used instead. (Accountant's guidance, 16 November 2026.)
 const OUTLET = {
-  oblik: 'usluzni-objekt',
+  oblik: 'ostalo',
   naziv: 'Adventure Kingdom',
   adresa: 'Šetalište dr. Franje Tuđmana 4a, 20207 Srebreno',
   oznaka: 'AK1',

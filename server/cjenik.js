@@ -82,6 +82,11 @@ function fileNameFor(brojPohrane, when = new Date()) {
 
 const FILE_RE = /^([a-z0-9-]+)_([a-z0-9-]+)_([a-z0-9-]+)_(\d+)_(\d{8}-\d{4})\.csv$/;
 
+/** The part of a published file name that identifies the outlet (point VI). */
+function outletPrefix() {
+  return [slug(OUTLET.oblik), slug(OUTLET.adresa), slug(OUTLET.oznaka)].join('_');
+}
+
 /** Every published version, newest first. */
 function listVersions() {
   return fs.readdirSync(DIR)
@@ -120,7 +125,13 @@ function publishIfChanged() {
   const versions = listVersions();
   const newest = versions[0];
 
-  if (newest && readVersion(newest.file) === csv) {
+  // The outlet type, address and label live in the file NAME, not in the contents, so a
+  // change to any of them has to publish a new file even when no price moved. Comparing
+  // contents alone would leave the old name standing as the current price list.
+  const prefix = outletPrefix();
+  const newestPrefix = newest ? newest.file.split('_').slice(0, 3).join('_') : null;
+
+  if (newest && newestPrefix === prefix && readVersion(newest.file) === csv) {
     prune();
     return newest;
   }
@@ -140,5 +151,5 @@ function current() {
 
 module.exports = {
   DIR, RETENTION_DAYS, OUTLET,
-  buildCsv, fileNameFor, listVersions, readVersion, publishIfChanged, current, money, slug,
+  buildCsv, fileNameFor, outletPrefix, listVersions, readVersion, publishIfChanged, current, money, slug,
 };
