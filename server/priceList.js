@@ -16,13 +16,22 @@
 // point II of the second decision. It is NOT today's price and must not be edited when a
 // price changes; it stays as it was on that date, for ever.
 //
-// `sidrena: null` means the service did not exist on 10 September 2026, so no price
-// applied to it then and there is no anchor price to state. The spreadsheet writes "/"
-// for these; the CSV leaves the field empty and the website says the service is new.
+// `sidrenaOd` is the date the anchor price is stated as of. It defaults to the statutory
+// reference date, 10.9.2026. Services introduced after that date had no price then, so on
+// the owner's instruction (16 November 2026) they carry their current price as the anchor,
+// stated as of the day it was set rather than as of 10.9.2026. The CSV has no date column
+// — point IV does not provide one — so the date shows on the website instead, which is
+// what the anchor price is for.
 //
 // Source: cjenik_adventure_kingdom.xlsx supplied 16 November 2026, which replaced the
 // 12 November version in full. Transcribed verbatim apart from one stray space inside
 // "( 2. dijete)".
+
+// The statutory reference date for the anchor price (Odluka NN 101/2026, point II).
+const SIDRENA_REFERENCE = '10.9.2026.';
+
+// The date the five services introduced after the reference date had their anchor set.
+const SIDRENA_NEW_SERVICES = '16.11.2026.';
 
 // Identifies the outlet in the published file name (point VI).
 //
@@ -70,13 +79,13 @@ const SERVICES = [
   { naziv: 'Kostimiranje', cijena: 20.0, sidrena: 20.0, posebniOblik: null },
   { naziv: 'Proširenje menija - nuggets', cijena: 9.0, sidrena: 9.0, posebniOblik: null },
   { naziv: 'Dodatni sat rođendana', cijena: 100.0, sidrena: 100.0, posebniOblik: null },
-  { naziv: 'Proširenje menija - dječji šampanjac', cijena: 2.0, sidrena: null, posebniOblik: null },
-  { naziv: 'Proširenje menija - pletenice', cijena: 3.0, sidrena: null, posebniOblik: null },
-  { naziv: 'Proširenje menija - slikanje na platnu', cijena: 5.0, sidrena: null, posebniOblik: null },
+  { naziv: 'Proširenje menija - dječji šampanjac', cijena: 2.0, sidrena: 2.0, sidrenaOd: SIDRENA_NEW_SERVICES, posebniOblik: null },
+  { naziv: 'Proširenje menija - pletenice', cijena: 3.0, sidrena: 3.0, sidrenaOd: SIDRENA_NEW_SERVICES, posebniOblik: null },
+  { naziv: 'Proširenje menija - slikanje na platnu', cijena: 5.0, sidrena: 5.0, sidrenaOd: SIDRENA_NEW_SERVICES, posebniOblik: null },
 
   // --- Radionice ---
-  { naziv: 'Standardna kreativna radionica', cijena: 15.0, sidrena: null, posebniOblik: null },
-  { naziv: 'Premium kreativna radionica', cijena: 20.0, sidrena: null, posebniOblik: null },
+  { naziv: 'Standardna kreativna radionica', cijena: 15.0, sidrena: 15.0, sidrenaOd: SIDRENA_NEW_SERVICES, posebniOblik: null },
+  { naziv: 'Premium kreativna radionica', cijena: 20.0, sidrena: 20.0, sidrenaOd: SIDRENA_NEW_SERVICES, posebniOblik: null },
   { naziv: 'Tjedni program, animacija', cijena: 250.0, sidrena: 250.0, posebniOblik: null },
   { naziv: 'Tjedni program, animacija, 1 dan', cijena: 50.0, sidrena: 50.0, posebniOblik: null },
   { naziv: 'Tjedni program, animacija, (2. dijete)', cijena: 175.0, sidrena: 175.0, posebniOblik: null },
@@ -85,4 +94,4 @@ const SERVICES = [
 /** Look up one service by its exact published name. Used to put the anchor price on the page. */
 const byName = Object.fromEntries(SERVICES.map((s) => [s.naziv, s]));
 
-module.exports = { OUTLET, SERVICES, byName };
+module.exports = { OUTLET, SERVICES, byName, SIDRENA_REFERENCE, SIDRENA_NEW_SERVICES };

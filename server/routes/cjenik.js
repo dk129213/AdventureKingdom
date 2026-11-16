@@ -73,9 +73,12 @@ router.get('/', (req, res) => {
             <tr>
               <td>${esc(s.naziv)}</td>
               <td class="cj-price">${esc(money(s.cijena))} &euro;</td>
-              <td class="cj-anchor">${s.sidrena === null
+              <td class="cj-anchor">${s.sidrena === null || s.sidrena === undefined
                 ? '<span class="cj-new" data-hr>nova usluga</span><span class="cj-new" data-en>new service</span>'
-                : esc(money(s.sidrena)) + ' &euro;'}</td>
+                : esc(money(s.sidrena)) + ' &euro;'
+                  + (s.sidrenaOd && s.sidrenaOd !== REFERENCE_DATE
+                      ? ' <span class="cj-asof">(' + esc(s.sidrenaOd) + ')</span>'
+                      : '')}</td>
               <td>${s.posebniOblik ? esc(s.posebniOblik) : '&mdash;'}</td>
             </tr>`).join('');
 
@@ -113,6 +116,7 @@ router.get('/', (req, res) => {
         .cj-table .cj-price { font-weight: 700; white-space: nowrap; }
         .cj-table .cj-anchor { color: var(--text-muted); white-space: nowrap; }
         .cj-new { font-style: italic; font-size: 0.85rem; }
+        .cj-asof { color: var(--stone); font-size: 0.78rem; white-space: nowrap; }
         .cj-download { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); color: var(--bg-dark); font-weight: 700; padding: 12px 22px; border-radius: var(--radius-lg); margin: 4px 0 8px; }
         .cj-archive { list-style: none; padding: 0; font-size: 0.88rem; }
         .cj-archive li { padding: 6px 0; border-bottom: 1px solid #f3f3f3; display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; }
@@ -151,8 +155,8 @@ router.get('/', (req, res) => {
                   <span data-en>${esc(OUTLET.naziv)} &middot; ${esc(OUTLET.adresa)} &middot; Last published: ${esc(prettyStamp(version.stamp))}</span>
                 </p>
 
-                <p class="cj-note" data-hr><strong>Sidrena cijena</strong> je maloprodajna cijena koja je za pojedinu uslugu bila primjenjiva na dan <strong>${REFERENCE_DATE}</strong>, sukladno Odluci o isticanju dodatne cijene (NN 101/2026, izmjena NN 110/2026). Sve cijene su u eurima (EUR) i uključuju PDV.</p>
-                <p class="cj-note" data-en>The <strong>anchor price</strong> is the retail price that applied to each service on <strong>10 September 2026</strong>, under the Croatian decision on displaying an additional price (NN 101/2026, amended by NN 110/2026). All prices are in euro (EUR) and include VAT.</p>
+                <p class="cj-note" data-hr><strong>Sidrena cijena</strong> je maloprodajna cijena koja je za pojedinu uslugu bila primjenjiva na dan <strong>${REFERENCE_DATE}</strong>, sukladno Odluci o isticanju dodatne cijene (NN 101/2026, izmjena NN 110/2026). Za usluge uvedene nakon tog datuma u zagradi je naveden datum na koji je sidrena cijena utvrđena. Sve cijene su u eurima (EUR) i uključuju PDV.</p>
+                <p class="cj-note" data-en>The <strong>anchor price</strong> is the retail price that applied to each service on <strong>10 September 2026</strong>, under the Croatian decision on displaying an additional price (NN 101/2026, amended by NN 110/2026). For services introduced after that date, the date the anchor price was set is shown in brackets. All prices are in euro (EUR) and include VAT.</p>
 
                 <h2 data-hr>Strojno čitljiv cjenik</h2>
                 <h2 data-en>Machine-readable price list</h2>
