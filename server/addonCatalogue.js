@@ -27,16 +27,11 @@ const ADDONS = [
     pricingMode: 'unit',
   },
   {
-    id: 'addon_mascot',
-    nameHr: 'Maskota',
-    nameEn: 'Mascot',
-    price: 20.00,
-    pricingMode: 'flat',
-  },
-  {
-    id: 'addon_pinata',
-    nameHr: 'Pinjata u obliku maskote',
-    nameEn: 'Mascot-shaped piñata',
+    // The published cjenik calls this Kostimiranje, and it replaces the Maskota and
+    // Pinjata add-ons, which the price list does not carry.
+    id: 'addon_kostimiranje',
+    nameHr: 'Kostimiranje',
+    nameEn: 'Costume character',
     price: 20.00,
     pricingMode: 'flat',
   },
@@ -65,11 +60,12 @@ const ADDONS = [
     pricingMode: 'per_child',
   },
   {
+    // Priced per braid, matching "Proširenje menija - pletenice" in the published cjenik.
     id: 'addon_braids',
     nameHr: 'Pletenice s mašnom',
     nameEn: 'Braids with a bow',
-    price: 20.00,
-    pricingMode: 'flat',
+    price: 3.00,
+    pricingMode: 'unit',
   },
 ];
 
@@ -79,6 +75,8 @@ const RETIRED_ADDONS = {
   // Customer-facing names only -- an edited old booking can re-send its confirmation email,
   // and "(retired)" is internal jargon. The admin form marks retired add-ons itself.
   addon_extra_child: { nameHr: 'Dodatna djeca', nameEn: 'Additional children' },
+  addon_mascot: { nameHr: 'Maskota', nameEn: 'Mascot' },
+  addon_pinata: { nameHr: 'Pinjata u obliku maskote', nameEn: 'Mascot-shaped piñata' },
 };
 
 const addonsById = Object.fromEntries(ADDONS.map((a) => [a.id, a]));
