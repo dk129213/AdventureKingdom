@@ -17,8 +17,12 @@
 // price changes; it stays as it was on that date, for ever.
 //
 // `sidrena: null` means the service did not exist on 10 September 2026, so no price
-// applied to it then and there is no anchor price to state. The CSV leaves that field
-// empty and the website says the service is new. Confirm this reading with the accountant.
+// applied to it then and there is no anchor price to state. The spreadsheet writes "/"
+// for these; the CSV leaves the field empty and the website says the service is new.
+//
+// Source: cjenik_adventure_kingdom.xlsx supplied 16 November 2026, which replaced the
+// 12 November version in full. Transcribed verbatim apart from one stray space inside
+// "( 2. dijete)".
 
 // Identifies the outlet in the published file name (point VI).
 const OUTLET = {
@@ -40,10 +44,7 @@ const SERVICES = [
   { naziv: 'Igranje 3 sata', cijena: 24.0, sidrena: 24.0, posebniOblik: null },
   { naziv: 'Mališani igranje 1 sat', cijena: 6.0, sidrena: 6.0, posebniOblik: null },
   { naziv: 'Mališani igranje 2 sata', cijena: 12.0, sidrena: 12.0, posebniOblik: null },
-  // NOTE: the supplied spreadsheet gives 24,00 € here. Every other ladder steps by the
-  // hourly rate (6/12/…), which would make this 18,00 €. Left exactly as supplied —
-  // published prices are binding, so this needs confirming before 17 November.
-  { naziv: 'Mališani igranje 3 sata', cijena: 24.0, sidrena: 24.0, posebniOblik: null },
+  { naziv: 'Mališani igranje 3 sata', cijena: 18.0, sidrena: 18.0, posebniOblik: null },
   { naziv: 'Mališani igranje 1 sat + zaštitna oprema', cijena: 8.0, sidrena: 8.0, posebniOblik: null },
   { naziv: 'Mališani igranje 2 sata + zaštitna oprema', cijena: 14.0, sidrena: 14.0, posebniOblik: null },
   { naziv: 'Mališani igranje 3 sata + zaštitna oprema', cijena: 20.0, sidrena: 20.0, posebniOblik: null },
@@ -54,22 +55,23 @@ const SERVICES = [
   // --- Rođendanske proslave ---
   { naziv: 'Lion rođendanski paket', cijena: 290.0, sidrena: 290.0, posebniOblik: null },
   { naziv: 'Royal rođendanski paket', cijena: 440.0, sidrena: 440.0, posebniOblik: null },
-  { naziv: 'Proširenja menija - pizza', cijena: 10.0, sidrena: 10.0, posebniOblik: null },
-  { naziv: 'Proširenja menija - torta', cijena: 20.0, sidrena: 20.0, posebniOblik: null },
-  { naziv: 'Proširenja menija - sok', cijena: 3.0, sidrena: 3.0, posebniOblik: null },
-  { naziv: 'Proširenja menija - nuggets', cijena: 9.0, sidrena: 9.0, posebniOblik: null },
-  { naziv: 'Zaštitna oprema za rođendan', cijena: 2.0, sidrena: 2.0, posebniOblik: null },
+  { naziv: 'Proširenje menija - pizza', cijena: 10.0, sidrena: 10.0, posebniOblik: null },
+  { naziv: 'Proširenje menija - torta', cijena: 20.0, sidrena: 20.0, posebniOblik: null },
+  { naziv: 'Dodatna zaštitna oprema za rođendan', cijena: 2.0, sidrena: 2.0, posebniOblik: null },
+  { naziv: 'Proširenje menija - sok', cijena: 3.0, sidrena: 3.0, posebniOblik: null },
   { naziv: 'Kostimiranje', cijena: 20.0, sidrena: 20.0, posebniOblik: null },
+  { naziv: 'Proširenje menija - nuggets', cijena: 9.0, sidrena: 9.0, posebniOblik: null },
   { naziv: 'Dodatni sat rođendana', cijena: 100.0, sidrena: 100.0, posebniOblik: null },
+  { naziv: 'Proširenje menija - dječji šampanjac', cijena: 2.0, sidrena: null, posebniOblik: null },
+  { naziv: 'Proširenje menija - pletenice', cijena: 3.0, sidrena: null, posebniOblik: null },
+  { naziv: 'Proširenje menija - slikanje na platnu', cijena: 5.0, sidrena: null, posebniOblik: null },
 
-  // --- Dodaci uvedeni nakon 10.9.2026. (nemaju sidrenu cijenu) ---
-  // These six are bookable on the website but are absent from the supplied spreadsheet
-  // because they were introduced after the 10 September 2026 reference date.
-  { naziv: 'Maskota', cijena: 20.0, sidrena: null, posebniOblik: null },
-  { naziv: 'Pinjata u obliku maskote', cijena: 20.0, sidrena: null, posebniOblik: null },
-  { naziv: 'Šećerna vata i dječji šampanjac (po djetetu)', cijena: 2.0, sidrena: null, posebniOblik: null },
-  { naziv: 'Slikanje na platnu (po djetetu)', cijena: 5.0, sidrena: null, posebniOblik: null },
-  { naziv: 'Pletenice s mašnom', cijena: 20.0, sidrena: null, posebniOblik: null },
+  // --- Radionice ---
+  { naziv: 'Standardna kreativna radionica', cijena: 15.0, sidrena: null, posebniOblik: null },
+  { naziv: 'Premium kreativna radionica', cijena: 20.0, sidrena: null, posebniOblik: null },
+  { naziv: 'Tjedni program, animacija', cijena: 250.0, sidrena: 250.0, posebniOblik: null },
+  { naziv: 'Tjedni program, animacija, 1 dan', cijena: 50.0, sidrena: 50.0, posebniOblik: null },
+  { naziv: 'Tjedni program, animacija, (2. dijete)', cijena: 175.0, sidrena: 175.0, posebniOblik: null },
 ];
 
 /** Look up one service by its exact published name. Used to put the anchor price on the page. */
